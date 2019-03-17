@@ -1,4 +1,4 @@
-### https://raw.github.com/github/gitignore/2aabd7b034f63d8fe7eeebf6d8651c0d331e69ef/Go.gitignore
+### https://raw.github.com/github/gitignore/76512d9b96c7d868eb3f65acaa0445ce09efb787/Go.gitignore
 
 # Binaries for programs and plugins
 *.exe
@@ -14,4 +14,3 @@
 *.out
 
 
-update-gitignore

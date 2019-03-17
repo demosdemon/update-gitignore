@@ -1,5 +1,4 @@
 SOURCE_FILES := $(shell find . -type f -not -path './vendor/*' -iname '*.go')
-PACKAGE := github.com/demosdemon/update-gitignore
 
 os = darwin linux openbsd windows
 arch = 386 amd64
