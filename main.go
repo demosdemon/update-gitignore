@@ -1,29 +1,20 @@
 package main
 
+import (
+	"fmt"
+)
+
 func main() {
 	state := NewState()
+	tree := state.Tree()
 
-	repo, err := state.GetRepository()
-	if err != nil {
-		state.Panic(err, "Error fetching repo!")
+	switch {
+	case state.Dump:
+	case state.List:
+		for k, v := range tree {
+			fmt.Printf("%s = %v\n", k, v)
+		}
+	default:
+		state.Fatal("One of -dump or -list is required.")
 	}
-
-	defaultBranch := repo.GetDefaultBranch()
-	state.Log("default branch: %s", defaultBranch)
-
-	branch, err := state.GetBranch(defaultBranch)
-	if err != nil {
-		state.Panic(err, "Error fetching branch %s!", defaultBranch)
-	}
-
-	commit := branch.GetCommit()
-	if commit == nil {
-		state.Fatal("Error fetching %s head commit!", defaultBranch)
-	}
-
-	sha := commit.GetSHA()
-	if sha == "" {
-		state.Fatal("Error fetching %s head commit!", defaultBranch)
-	}
-	state.Log("%s HEAD commit %s", defaultBranch, sha)
 }
