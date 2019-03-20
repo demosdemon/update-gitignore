@@ -9,7 +9,7 @@ language: go
 go:
   - "1.11"
   - "1.12"
-  - tag
+  - master
 
 os:
   - linux
@@ -30,7 +30,7 @@ script:
 matrix:
   fast_finish: true
   allow_failures:
-    - go: tag
+    - go: master
 
 notifications:
   slack:
