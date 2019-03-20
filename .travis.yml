@@ -1,24 +1,37 @@
+language: go
 env:
   global:
     - GO111MODULE=on
     - secure: MKONE9/YgmlNO0mggFILpY7Uw65WET8n2n1jmgYaJ6+ppFGU84hjGZf+DT7o1j7cI6h0w0ZyldLGFjCPUfglW9itY2n377zXEz6o5kJJSWHzOtN75tueimVVv+bU69SJjp920KvcRrb4qKNcC1YiFTtd+UfzlsgEnQeRXfGOFhqlV7zFBLLe0xHqPMWbBzsjBZC7zuVFxpp41E2jPTZmdfDVzjORz2m2a5CCOfWhIRUrIOsyhDLCD+rj/mMdwja5HtfWrcf3+DrN1vgvwxVcGYUyDPRx4RX/EYcuEU3fwghsfeXAi37StGR/N1fj9H2zDB87/XbtnW1x4XCwnMNWcK1r4CkI8DzpyfO5rijYG2tJdv00VzKCMb/Y/KtDzC9wcxNhYfRw6ABCpoUjR0PKsWx+BBjsy2iXrA0sYX68SOy6PmovNS5mp/SJKeyJPIy6QkhoZU7KjjtlR/upMichkse3Po5w/A74Qc6VjRCiDYGayMnH7cF6K365G6tFWJQ7D/NON8pD1y4faovG2Rqnag/fC7JZ9pLqIFyk8Kt8ZWLdXJ4bfWKYqt7EfLqVYsd2ByPDdwqj3THhHO4NnKuu63Q6EKTkbxC0j+q48QD5DmhQHDz0vo9mGmVIvAfIZ1ACfhtPeg/bB0sHRFCPwxu+ZBK/3DSLef/AsPZalIQoGU8=
     - secure: g5qQoGabuQvxnWiXtyz8+d1q2tUHH2dQFuyWlpwL42b839T7tC3HSYnnzKzXirkW1hZIBAJg+IPuLJvM2kp+oakOjQydQAaX7/JSa+zSgeePjiUizWUEejRtAZTD9hIlusaOtXbZvi3CoAk+cDPSnPImcsyq1thA0mxY2G0adNT/APteBpUmRtxgBoYQS4lpxCOtH1Ne53E2m7lxmeruyfjM+ZLpUYq30JjlhNi+NGbifMgOz4FiCjm7c7a0h2DFNyukmJeHE+GxlwEl/RuTXLlf9ZawSNtFNrK+yh8hyGPrG1V7mjJLEwuo3TTz3/bEY/Ukhv5y17Q6MWfjCLxxl8duYyEU97JX+D32XwXoncC2Wm/G1JhrL4utm6OYB+GTccbBUHkX9+v/yD9IMEIh4ppPFtDspjS0MYIGfyD542RF9qU4ImcBTFL5eCnbYAAl8W7iJ4lhxWlluG8f6iFeGXtHxHIM7skXHMgJWIv5x+HtQplNR11BQJEJwjF1cF9F+WipOOUlkUp+2/oivJeIDIapfkNEJRCnWZ0kY6+ONZqkgeJGQbnobK7eSIj19DAkK/pGp8zqaWnWLBKwgxjdec8/ICCSYoCrz/MiHaS6S9V2MGgI4dPr1Eae/3t7SS4wHFhqO5tGvIQ93+K97auVSwGX4UwiKlgPunVFJ5BaRoA=
 
-cache:
-  directories:
-    - $HOME/.cache/go-build
-    - $HOME/gopath/pkg/mod
-
-language: go
-
-go:
-  - "1.12"
-  - master
-
-os:
-  - linux
-  - osx
-  - windows
+matrix:
+  fast_finish: true
+  allow_failures:
+    - go: master
+    - os: windows
+  include:
+    - os: linux
+      go: 1.12.x
+      cache: &linuxCache
+        directories:
+          - $HOME/.cache/go-build
+          - $HOME/gopath/pkg/mod
+    - os: linux
+      go: master
+      cache: *linuxCache
+    - os: osx
+      go: 1.12.x
+      cache: &macosCache
+        directories:
+          - $HOME/Library/Caches/go-build
+          - $HOME/gopath/pkg/mod
+    - os: osx
+      go: master
+      cache: *macosCache
+    - os: windows
+      go: 1.12.x
+      # TODO: cache on windows?
 
 before_install:
   - if [[ $TRAVIS_OS_NAME == windows ]]; then choco install mingw -y; export PATH="/c/tools/mingw64/bin:$PATH"; fi
@@ -36,12 +49,6 @@ script:
   - make
   - go test -v -covermode=count -coverprofile=coverage.out ./...
   - goveralls -coverprofile=coverage.out -service=travis-ci -repotoken $COVERALLS_TOKEN
-
-matrix:
-  fast_finish: true
-  allow_failures:
-    - go: master
-    - os: windows
 
 notifications:
   slack:
