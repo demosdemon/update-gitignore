@@ -15,6 +15,7 @@ os:
   - osx
 
 before_install:
+  - if [[ $TRAVIS_OS_NAME == windows ]]; then choco install mingw -y; export PATH="/c/tools/mingw64/bin:$PATH"; fast_finish
   - |
     (
       set -eux;
@@ -27,7 +28,7 @@ before_install:
     )
 
 install:
-  - go mod vendor
+  - go mod download
 
 script:
   - golangci-lint run
