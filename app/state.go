@@ -30,6 +30,9 @@ type State struct {
 
 // NewState build a new application state object
 func NewState(arguments []string) *State {
+	*debug = false
+	*dump = false
+	*list = false
 
 	flag.Usage = usage
 	// use a var so args can be mocked in tests

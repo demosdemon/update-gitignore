@@ -114,11 +114,12 @@ func TestGetDefaultBranch(t *testing.T) {
 
 func TestGetBranchHead(t *testing.T) {
 	t.Run("cancelled", func(t *testing.T) {
+		state := NewState([]string{"-debug", "-list"})
 		ctx := context.Background()
 		ctx, cancel := context.WithCancel(ctx)
 		cancel()
 
-		commit := ValidState.GetBranchHead(ctx, "master")
+		commit := state.GetBranchHead(ctx, "master")
 		assert.EqualValues(t, "", commit)
 	})
 	t.Run("not cancelled", func(t *testing.T) {
