@@ -41,7 +41,8 @@ func (s *State) GetDefaultBranch(ctx context.Context) string {
 	repo, _, err := s.Client(ctx).Repositories.Get(ctx, s.Owner, s.Repo)
 	if err != nil {
 		gomol.Fatalf("Error fetching repo %s/%s.", s.Owner, s.Repo)
-		panic(err)
+		panicUnlessCanceled(ctx, err)
+		return ""
 	}
 
 	rv := repo.GetDefaultBranch()
@@ -54,7 +55,8 @@ func (s *State) GetBranchHead(ctx context.Context, branchName string) string {
 	branch, _, err := s.Client(ctx).Repositories.GetBranch(ctx, s.Owner, s.Repo, branchName)
 	if err != nil {
 		gomol.Fatalf("Error fetching branch %s for repo %s/%s.", branchName, s.Owner, s.Repo)
-		panic(err)
+		panicUnlessCanceled(ctx, err)
+		return ""
 	}
 
 	commit := branch.Commit
@@ -82,7 +84,8 @@ func (s *State) getTree(ctx context.Context, sha string) <-chan *gitignore.Templ
 		tree, _, err := s.Client(ctx).Git.GetTree(ctx, s.Owner, s.Repo, sha, false)
 		if err != nil {
 			gomol.Fatalf("Error fetching tree %s", sha)
-			panic(err)
+			panicUnlessCanceled(ctx, err)
+			return
 		}
 
 		for _, entry := range tree.Entries {
@@ -117,4 +120,18 @@ func (s *State) getTree(ctx context.Context, sha string) <-chan *gitignore.Templ
 	}()
 
 	return out
+}
+
+func panicUnlessCanceled(ctx context.Context, err error) {
+	if err == nil {
+		return
+	}
+
+	select {
+	case <-ctx.Done():
+		gomol.Warning(err.Error())
+		return
+	default:
+		panic(err)
+	}
 }

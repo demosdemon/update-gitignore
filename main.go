@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"os"
 	"time"
 
 	"github.com/demosdemon/update-gitignore/app"
@@ -13,7 +14,7 @@ func main() {
 	shutdown := app.InitLogging()
 	defer shutdown()
 
-	state := app.NewState()
+	state := app.NewState(os.Args[1:])
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Minute*5)
 	defer cancel()

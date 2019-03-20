@@ -22,7 +22,7 @@ type State struct {
 }
 
 // NewState build a new application state object
-func NewState() *State {
+func NewState(arguments []string) *State {
 	state := new(State)
 
 	flag.Usage = state.Usage
@@ -36,7 +36,8 @@ func NewState() *State {
 	)
 	repo := flag.String("repo", "github/gitignore", "The template repo to use.")
 
-	flag.Parse()
+	// use var so args can be mocked in tests
+	_ = flag.CommandLine.Parse(arguments)
 	state.Templates = flag.Args()
 	if *debug {
 		gomol.SetLogLevel(gomol.LevelDebug)

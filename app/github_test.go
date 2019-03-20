@@ -63,7 +63,7 @@ func TestClient(t *testing.T) {
 			err := os.Setenv("GITHUB_TOKEN", token)
 			assert.NoError(t, err)
 
-			var state = State{}
+			state := State{}
 			client := state.Client(ctx)
 
 			rl, _, err := client.RateLimits(ctx)
@@ -71,4 +71,17 @@ func TestClient(t *testing.T) {
 			assert.Truef(t, rl.Core.Limit >= 5000, "rl.Core.Limit < 5000: %d", rl.Core.Limit)
 		})
 	})
+}
+
+func TestTreeUnrealisticTimeout(t *testing.T) {
+	ctx := context.Background()
+	s := NewState([]string{"-debug", "-list"})
+	branch := s.GetDefaultBranch(ctx)
+	commit := s.GetBranchHead(ctx, branch)
+
+	ctx, cancel := context.WithTimeout(ctx, time.Microsecond)
+	defer cancel()
+	ch := s.getTree(ctx, commit)
+	_, ok := <-ch
+	assert.False(t, ok)
 }
