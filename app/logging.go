@@ -37,19 +37,6 @@ func InitLogging() func() {
 		panic(err)
 	}
 
-	// XXX: add os.Environ()?
-	gomol.Debugf("executable = %s", stringOrError(os.Executable))
-	gomol.Debugf("euid = %d", os.Geteuid())
-	gomol.Debugf("euid = %d", os.Geteuid())
-	gomol.Debugf("egid = %d", os.Getegid())
-	gomol.Debugf("uid = %d", os.Getuid())
-	gomol.Debugf("gid = %d", os.Getgid())
-	// XXX: add os.Groups()
-	gomol.Debugf("pid = %d", os.Getpid())
-	gomol.Debugf("ppid = %d", os.Getppid())
-	gomol.Debugf("cwd = %s", stringOrError(os.Getwd))
-	gomol.Debugf("hostname = %s", stringOrError(os.Hostname))
-
 	return func() {
 		gomol.ShutdownLoggers()
 	}

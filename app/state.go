@@ -51,11 +51,24 @@ func NewState() *State {
 	state.Owner = slice[0]
 	state.Repo = slice[1]
 
-	gomol.Debugf("Dump  = %t", state.Dump)
-	gomol.Debugf("List  = %t", state.List)
-	gomol.Debugf("Owner = %s", state.Owner)
-	gomol.Debugf("Repo  = %s", state.Repo)
-	gomol.Debugf("Templates = %v", state.Templates)
+	// command line options
+	gomol.Debugf("Dump       = %t", state.Dump)
+	gomol.Debugf("List       = %t", state.List)
+	gomol.Debugf("Owner      = %s", state.Owner)
+	gomol.Debugf("Repo       = %s", state.Repo)
+	gomol.Debugf("Templates  = %v", state.Templates)
+	// XXX: add os.Environ()?
+	gomol.Debugf("executable = %s", stringOrError(os.Executable))
+	gomol.Debugf("euid       = %d", os.Geteuid())
+	gomol.Debugf("euid       = %d", os.Geteuid())
+	gomol.Debugf("egid       = %d", os.Getegid())
+	gomol.Debugf("uid        = %d", os.Getuid())
+	gomol.Debugf("gid        = %d", os.Getgid())
+	// XXX: add os.Groups()
+	gomol.Debugf("pid        = %d", os.Getpid())
+	gomol.Debugf("ppid       = %d", os.Getppid())
+	gomol.Debugf("cwd        = %s", stringOrError(os.Getwd))
+	gomol.Debugf("hostname   = %s", stringOrError(os.Hostname))
 
 	if state.Dump && state.List {
 		gomol.Die(1, "-dump and -list are mutually exclusive.")
