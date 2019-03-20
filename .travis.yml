@@ -15,6 +15,8 @@ os:
   - osx
 
 before_install:
+  - export GOPATH="${GOPATH:-${HOME}/gopath}"
+  - export PATH="${GOPATH}/bin:${PATH}"
   - go get golang.org/x/tools/cmd/cover
   - go get github.com/mattn/goveralls
   - go get github.com/golangci/golangci-lint
@@ -26,7 +28,7 @@ script:
   - golangci-lint run
   - make
   - go test -v -covermode=count -coverprofile=coverage.out ./...
-  - "$HOME/gopath/bin/goveralls -coverprofile=coverage.out -service=travis-ci -repotoken $COVERALLS_TOKEN"
+  - goveralls -coverprofile=coverage.out -service=travis-ci -repotoken $COVERALLS_TOKEN
 
 matrix:
   fast_finish: true
