@@ -1,6 +1,6 @@
 module github.com/demosdemon/update-gitignore
 
-go 1.12
+go 1.11
 
 require (
 	github.com/aphistic/gomol v0.0.0-20190314031446-1546845ba714
