@@ -11,12 +11,7 @@ import (
 )
 
 // nolint
-var ValidState *State
-
-func TestMain(m *testing.M) {
-	ValidState = NewState([]string{"-debug", "-list"})
-	os.Exit(m.Run())
-}
+var ValidState = NewState([]string{"-debug", "-list"})
 
 func clearAndRestoreEnviron(f func()) {
 	environ := os.Environ()
