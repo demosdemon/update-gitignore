@@ -10,9 +10,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// nolint
-var ValidState = NewState([]string{"-debug", "-list"})
-
 func clearAndRestoreEnviron(f func()) {
 	environ := os.Environ()
 	os.Clearenv()
@@ -78,28 +75,31 @@ func TestClient(t *testing.T) {
 
 func TestTreeUnrealisticTimeout(t *testing.T) {
 	ctx := context.Background()
-	branch := ValidState.GetDefaultBranch(ctx)
-	commit := ValidState.GetBranchHead(ctx, branch)
+	state := NewState([]string{"-debug", "-list"})
+	branch := state.GetDefaultBranch(ctx)
+	commit := state.GetBranchHead(ctx, branch)
 
 	ctx, cancel := context.WithTimeout(ctx, time.Microsecond)
 	defer cancel()
-	ch := ValidState.getTree(ctx, commit)
+	ch := state.getTree(ctx, commit)
 	_, ok := <-ch
 	assert.False(t, ok)
 }
 
 func TestGetDefaultBranch(t *testing.T) {
+	state := NewState([]string{"-dump", "Python"})
+
 	t.Run("cancelled", func(t *testing.T) {
 		ctx := context.Background()
 		ctx, cancel := context.WithCancel(ctx)
 		cancel()
 
-		branch := ValidState.GetDefaultBranch(ctx)
+		branch := state.GetDefaultBranch(ctx)
 		assert.EqualValues(t, "", branch)
 	})
 	t.Run("not cancelled", func(t *testing.T) {
 		ctx := context.Background()
-		branch := ValidState.GetDefaultBranch(ctx)
+		branch := state.GetDefaultBranch(ctx)
 		assert.EqualValues(t, "master", branch)
 	})
 	t.Run("invalid repo", func(t *testing.T) {

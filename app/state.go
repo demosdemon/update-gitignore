@@ -9,6 +9,13 @@ import (
 	"github.com/aphistic/gomol"
 )
 
+var (
+	debug = flag.Bool("debug", false, "Print debug statements to STDERR.")
+	dump  = flag.Bool("dump", false, "Dump the specified templates to STDOUT.")
+	list  = flag.Bool("list", false, "List the available templates. If any, arguments are used to filter the results.")
+	repo  = flag.String("repo", "github/gitignore", "The template repo to use.")
+)
+
 // The State of the application.
 type State struct {
 	// command line arguments
@@ -23,22 +30,11 @@ type State struct {
 
 // NewState build a new application state object
 func NewState(arguments []string) *State {
-	state := new(State)
 
-	flag.Usage = state.Usage
-	debug := flag.Bool("debug", false, "Print debug statements to STDERR.")
-	flag.BoolVar(&state.Dump, "dump", false, "Dump the specified templates to STDOUT.")
-	flag.BoolVar(
-		&state.List,
-		"list",
-		false,
-		"List the available templates. If any, arguments are used to filter the results.",
-	)
-	repo := flag.String("repo", "github/gitignore", "The template repo to use.")
-
-	// use var so args can be mocked in tests
+	flag.Usage = usage
+	// use a var so args can be mocked in tests
 	_ = flag.CommandLine.Parse(arguments)
-	state.Templates = flag.Args()
+
 	if *debug {
 		gomol.SetLogLevel(gomol.LevelDebug)
 	} else {
@@ -49,8 +45,14 @@ func NewState(arguments []string) *State {
 	if len(slice) != 2 {
 		gomol.Dief(2, "Invalid repo (%v). Expected a name in the form `<owner>/<repo>`.", slice)
 	}
-	state.Owner = slice[0]
-	state.Repo = slice[1]
+
+	state := &State{
+		Dump:      *dump,
+		List:      *list,
+		Templates: flag.Args(),
+		Owner:     slice[0],
+		Repo:      slice[1],
+	}
 
 	// command line options
 	gomol.Debugf("Dump       = %t", state.Dump)
@@ -87,7 +89,7 @@ func NewState(arguments []string) *State {
 }
 
 // Usage prints command line usage information.
-func (State) Usage() {
+func usage() {
 	fmt.Printf("usage: %s [flags] [template ...]\n", os.Args[0])
 	flag.PrintDefaults()
 }
