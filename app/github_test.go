@@ -10,6 +10,14 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// nolint
+var ValidState *State
+
+func TestMain(m *testing.M) {
+	ValidState = NewState([]string{"-debug", "-list"})
+	os.Exit(m.Run())
+}
+
 func clearAndRestoreEnviron(f func()) {
 	environ := os.Environ()
 	os.Clearenv()
@@ -75,13 +83,63 @@ func TestClient(t *testing.T) {
 
 func TestTreeUnrealisticTimeout(t *testing.T) {
 	ctx := context.Background()
-	s := NewState([]string{"-debug", "-list"})
-	branch := s.GetDefaultBranch(ctx)
-	commit := s.GetBranchHead(ctx, branch)
+	branch := ValidState.GetDefaultBranch(ctx)
+	commit := ValidState.GetBranchHead(ctx, branch)
 
 	ctx, cancel := context.WithTimeout(ctx, time.Microsecond)
 	defer cancel()
-	ch := s.getTree(ctx, commit)
+	ch := ValidState.getTree(ctx, commit)
 	_, ok := <-ch
 	assert.False(t, ok)
+}
+
+func TestGetDefaultBranch(t *testing.T) {
+	t.Run("cancelled", func(t *testing.T) {
+		ctx := context.Background()
+		ctx, cancel := context.WithCancel(ctx)
+		cancel()
+
+		branch := ValidState.GetDefaultBranch(ctx)
+		assert.EqualValues(t, "", branch)
+	})
+	t.Run("not cancelled", func(t *testing.T) {
+		ctx := context.Background()
+		branch := ValidState.GetDefaultBranch(ctx)
+		assert.EqualValues(t, "master", branch)
+	})
+	t.Run("invalid repo", func(t *testing.T) {
+		ctx := context.Background()
+		state := State{Owner: "demosdemon", Repo: "thisrepodoesnotexist"}
+
+		assert.Panics(t, func() {
+			_ = state.GetDefaultBranch(ctx)
+		})
+	})
+}
+
+func TestGetBranchHead(t *testing.T) {
+	t.Run("cancelled", func(t *testing.T) {
+		ctx := context.Background()
+		ctx, cancel := context.WithCancel(ctx)
+		cancel()
+
+		commit := ValidState.GetBranchHead(ctx, "master")
+		assert.EqualValues(t, "", commit)
+	})
+	t.Run("not cancelled", func(t *testing.T) {
+		ctx := context.Background()
+		// intentionally defunct repo in attempt to make the sha constant
+		state := State{Owner: "demosdemon", Repo: "CheckBuyvm"}
+
+		commit := state.GetBranchHead(ctx, "master")
+		assert.EqualValues(t, "251502fe2ce94571548baf1710cde2beca037d57", commit)
+	})
+	t.Run("invalid repo", func(t *testing.T) {
+		ctx := context.Background()
+		state := State{Owner: "demosdemon", Repo: "thisrepodoesnotexist"}
+
+		assert.Panics(t, func() {
+			_ = state.GetBranchHead(ctx, "master")
+		})
+	})
 }
