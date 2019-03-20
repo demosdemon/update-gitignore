@@ -40,12 +40,12 @@ func (s *State) Tree(ctx context.Context) <-chan *gitignore.Template {
 func (s *State) GetDefaultBranch(ctx context.Context) string {
 	repo, _, err := s.Client(ctx).Repositories.Get(ctx, s.Owner, s.Repo)
 	if err != nil {
-		_ = gomol.Fatalf("Error fetching repo %s/%s.", s.Owner, s.Repo)
+		gomol.Fatalf("Error fetching repo %s/%s.", s.Owner, s.Repo)
 		panic(err)
 	}
 
 	rv := repo.GetDefaultBranch()
-	_ = gomol.Debugf("default branch = %s", rv)
+	gomol.Debugf("default branch = %s", rv)
 	return rv
 }
 
@@ -53,7 +53,7 @@ func (s *State) GetDefaultBranch(ctx context.Context) string {
 func (s *State) GetBranchHead(ctx context.Context, branchName string) string {
 	branch, _, err := s.Client(ctx).Repositories.GetBranch(ctx, s.Owner, s.Repo, branchName)
 	if err != nil {
-		_ = gomol.Fatalf("Error fetching branch %s for repo %s/%s.", branchName, s.Owner, s.Repo)
+		gomol.Fatalf("Error fetching branch %s for repo %s/%s.", branchName, s.Owner, s.Repo)
 		panic(err)
 	}
 
@@ -68,7 +68,7 @@ func (s *State) GetBranchHead(ctx context.Context, branchName string) string {
 	}
 
 	rv := *sha
-	_ = gomol.Debugf("head commit = %s", rv)
+	gomol.Debugf("head commit = %s", rv)
 	return rv
 }
 
@@ -81,7 +81,7 @@ func (s *State) getTree(ctx context.Context, sha string) <-chan *gitignore.Templ
 
 		tree, _, err := s.Client(ctx).Git.GetTree(ctx, s.Owner, s.Repo, sha, false)
 		if err != nil {
-			_ = gomol.Fatalf("Error fetching tree %s", sha)
+			gomol.Fatalf("Error fetching tree %s", sha)
 			panic(err)
 		}
 
@@ -93,7 +93,7 @@ func (s *State) getTree(ctx context.Context, sha string) <-chan *gitignore.Templ
 					select {
 					case out <- gitignore:
 					case <-ctx.Done():
-						_ = gomol.Warning("getTree loop canceled")
+						gomol.Warning("getTree loop canceled")
 						return
 					}
 				}
@@ -110,7 +110,7 @@ func (s *State) getTree(ctx context.Context, sha string) <-chan *gitignore.Templ
 					wg.Done()
 				}()
 			default:
-				_ = gomol.Warningf("Unknown tree entry type %s %#v", Type, entry)
+				gomol.Warningf("Unknown tree entry type %s %#v", Type, entry)
 			}
 		}
 		wg.Wait()

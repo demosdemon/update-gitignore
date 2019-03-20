@@ -26,6 +26,6 @@ func main() {
 			fmt.Printf("%+v\n", v)
 		}
 	default:
-		panic(errors.New("How did we get here?!"))
+		panic(errors.New("how did we get here"))
 	}
 }

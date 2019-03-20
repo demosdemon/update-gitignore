@@ -42,7 +42,7 @@ func TestClient(t *testing.T) {
 	assert.True(t, ok, "Missing environment variable GITHUB_TOKEN")
 
 	t.Run("Test Client with nil state", func(t *testing.T) {
-		var state *State = nil
+		var state *State
 		client := state.Client(ctx)
 		assert.Nil(t, client)
 	})

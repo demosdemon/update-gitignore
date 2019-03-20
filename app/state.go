@@ -46,11 +46,11 @@ func NewState() *State {
 	state.Owner = slice[0]
 	state.Repo = slice[1]
 
-	_ = gomol.Debugf("Dump  = %t", state.Dump)
-	_ = gomol.Debugf("List  = %t", state.List)
-	_ = gomol.Debugf("Owner = %s", state.Owner)
-	_ = gomol.Debugf("Repo  = %s", state.Repo)
-	_ = gomol.Debugf("Templates = %v", state.Templates)
+	gomol.Debugf("Dump  = %t", state.Dump)
+	gomol.Debugf("List  = %t", state.List)
+	gomol.Debugf("Owner = %s", state.Owner)
+	gomol.Debugf("Repo  = %s", state.Repo)
+	gomol.Debugf("Templates = %v", state.Templates)
 
 	if state.Dump && state.List {
 		gomol.Die(1, "-dump and -list are mutually exclusive.")

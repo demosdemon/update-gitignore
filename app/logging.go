@@ -8,13 +8,15 @@ import (
 )
 
 func stringOrError(call func() (string, error)) string {
-	if rv, err := call(); err == nil {
+	rv, err := call()
+	if err == nil {
 		return rv
-	} else {
-		return err.Error()
 	}
+	return err.Error()
 }
 
+// InitLogging initializes the gomol logging system for the application. Returns
+// a shutdown function that should be called before the app terminates.
 func InitLogging() func() {
 	consoleCfg := gc.NewConsoleLoggerConfig()
 	consoleCfg.Writer = os.Stderr
@@ -36,19 +38,19 @@ func InitLogging() func() {
 	}
 
 	// XXX: add os.Environ()?
-	_ = gomol.Debugf("executable = %s", stringOrError(os.Executable))
-	_ = gomol.Debugf("euid = %d", os.Geteuid())
-	_ = gomol.Debugf("euid = %d", os.Geteuid())
-	_ = gomol.Debugf("egid = %d", os.Getegid())
-	_ = gomol.Debugf("uid = %d", os.Getuid())
-	_ = gomol.Debugf("gid = %d", os.Getgid())
+	gomol.Debugf("executable = %s", stringOrError(os.Executable))
+	gomol.Debugf("euid = %d", os.Geteuid())
+	gomol.Debugf("euid = %d", os.Geteuid())
+	gomol.Debugf("egid = %d", os.Getegid())
+	gomol.Debugf("uid = %d", os.Getuid())
+	gomol.Debugf("gid = %d", os.Getgid())
 	// XXX: add os.Groups()
-	_ = gomol.Debugf("pid = %d", os.Getpid())
-	_ = gomol.Debugf("ppid = %d", os.Getppid())
-	_ = gomol.Debugf("cwd = %s", stringOrError(os.Getwd))
-	_ = gomol.Debugf("hostname = %s", stringOrError(os.Hostname))
+	gomol.Debugf("pid = %d", os.Getpid())
+	gomol.Debugf("ppid = %d", os.Getppid())
+	gomol.Debugf("cwd = %s", stringOrError(os.Getwd))
+	gomol.Debugf("hostname = %s", stringOrError(os.Hostname))
 
 	return func() {
-		_ = gomol.ShutdownLoggers()
+		gomol.ShutdownLoggers()
 	}
 }
