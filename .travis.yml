@@ -29,12 +29,12 @@ matrix:
     - os: osx
       go: master
       cache: *macosCache
-    - os: windows
-      go: 1.12.x
-      cache:
-        directories:
-          - '%USERPROFILE%\AppData\Local\go-build'
-          - '%USERPROFILE%\gopath\pkg\mod'
+    # - os: windows
+    #   go: 1.12.x
+    #   cache:
+    #     directories:
+    #       - '%USERPROFILE%\AppData\Local\go-build'
+    #       - '%USERPROFILE%\gopath\pkg\mod'
 
 before_install:
   - go get golang.org/x/tools/cmd/cover
