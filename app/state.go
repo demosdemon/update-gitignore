@@ -28,7 +28,12 @@ func NewState() *State {
 	flag.Usage = state.Usage
 	debug := flag.Bool("debug", false, "Print debug statements to STDERR.")
 	flag.BoolVar(&state.Dump, "dump", false, "Dump the specified templates to STDOUT.")
-	flag.BoolVar(&state.List, "list", false, "List the available templates. If any, arguments are used to filter the results.")
+	flag.BoolVar(
+		&state.List,
+		"list",
+		false,
+		"List the available templates. If any, arguments are used to filter the results.",
+	)
 	repo := flag.String("repo", "github/gitignore", "The template repo to use.")
 
 	flag.Parse()

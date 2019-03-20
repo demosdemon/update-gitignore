@@ -59,12 +59,12 @@ func (s *State) GetBranchHead(ctx context.Context, branchName string) string {
 
 	commit := branch.Commit
 	if commit == nil {
-		panic(fmt.Errorf("Got nil for branch.Commit: %#v", branch))
+		panic(fmt.Errorf("got nil for branch.Commit: %#v", branch))
 	}
 
 	sha := commit.SHA
 	if sha == nil {
-		panic(fmt.Errorf("Got nil for branch.Commit.SHA: %#v", branch))
+		panic(fmt.Errorf("got nil for branch.Commit.SHA: %#v", branch))
 	}
 
 	rv := *sha
