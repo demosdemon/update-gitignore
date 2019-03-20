@@ -16,17 +16,11 @@ os:
 
 before_install:
   - if [[ $TRAVIS_OS_NAME == windows ]]; then choco install mingw -y; export PATH="/c/tools/mingw64/bin:$PATH"; fi
-  - |
-    (
-      set -eux;
-      cd $GOPATH;
-      go get golang.org/x/tools/cmd/cover
-      go get github.com/mattn/goveralls
-      go get github.com/golangci/golangci-lint
-      ls -l bin/
-      command -v goveralls
-      command -v golangci-lint
-    )
+  - go get golang.org/x/tools/cmd/cover
+  - go get github.com/mattn/goveralls
+  - go get github.com/golangci/golangci-lint/cmd/golangci-lint@v1.15.0
+  - command -v goveralls
+  - command -v golangci-lint
 
 install:
   - go mod download
