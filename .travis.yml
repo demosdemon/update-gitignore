@@ -31,10 +31,12 @@ matrix:
       cache: *macosCache
     - os: windows
       go: 1.12.x
-      # TODO: cache on windows?
+      cache:
+        directories:
+          - '%USERPROFILE%\AppData\Local\go-build'
+          - '%USERPROFILE%\gopath\pkg\mod'
 
 before_install:
-  - if [[ $TRAVIS_OS_NAME == windows ]]; then choco install mingw -y; export PATH="/c/tools/mingw64/bin:$PATH"; fi
   - go get golang.org/x/tools/cmd/cover
   - go get github.com/mattn/goveralls
   - go get github.com/golangci/golangci-lint/cmd/golangci-lint@v1.15.0
