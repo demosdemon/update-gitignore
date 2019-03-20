@@ -17,6 +17,10 @@ import (
 // GITHUB_TOKEN is found, uses it to authenticate GitHub API requests. An API
 // token is not required; however, advised due to API rate-limiting.
 func (s *State) Client(ctx context.Context) *github.Client {
+	if s == nil {
+		return nil
+	}
+
 	if token, found := os.LookupEnv("GITHUB_TOKEN"); found {
 		ts := oauth2.StaticTokenSource(&oauth2.Token{AccessToken: token})
 		tc := oauth2.NewClient(ctx, ts)
