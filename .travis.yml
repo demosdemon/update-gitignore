@@ -11,6 +11,11 @@ go:
   - "1.12"
   - tag
 
+os:
+  - linux
+  - osx
+  - windows
+
 before_install:
   - go get golang.org/x/tools/cmd/cover
   - go get github.com/mattn/goveralls
