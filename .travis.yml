@@ -13,6 +13,7 @@ go:
 os:
   - linux
   - osx
+  - windows
 
 before_install:
   - if [[ $TRAVIS_OS_NAME == windows ]]; then choco install mingw -y; export PATH="/c/tools/mingw64/bin:$PATH"; fi
@@ -35,6 +36,7 @@ matrix:
   fast_finish: true
   allow_failures:
     - go: master
+    - os: windows
 
 notifications:
   slack:
