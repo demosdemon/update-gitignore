@@ -1,0 +1,11 @@
+Source: update-gitignore
+Maintainer: Brandon LeBlanc <brandon@platform.sh>
+Section: net
+Priority: optional
+Build-Depends: debhelper (>= 7)
+Standards-Version: 3.9.1
+
+Package: update-gitignore
+Architecture: all
+Depends: ${misc:Depends}
+Description: Fetches and updates local `.gitignore` file based on the templates provided at https://github.com/github/gitignore.

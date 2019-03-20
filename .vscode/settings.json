@@ -1,0 +1,10 @@
+{
+  "go.lintOnSave": "workspace",
+  "go.buildOnSave": "workspace",
+  "go.gocodeAutoBuild": true,
+  "go.lintTool": "golangci-lint",
+  "[go]": {
+    "editor.formatOnSave": false,
+    "editor.formatOnPaste": true
+  }
+}

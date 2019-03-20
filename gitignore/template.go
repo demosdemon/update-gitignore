@@ -1,4 +1,4 @@
-package main
+package gitignore
 
 import (
 	"path"
@@ -7,18 +7,23 @@ import (
 	"github.com/google/go-github/v24/github"
 )
 
-// Gitignore represents a gitignore template from the repository
-type Gitignore struct {
+const (
+	// Suffix is the file suffix to grok.
+	Suffix = ".gitignore"
+)
+
+// Template represents a gitignore template from the repository
+type Template struct {
 	Name string
 	Size uint64
 	Path string
 	Tags []string
 	SHA  string
-
-	state *State
 }
 
-func (s *State) makeGitignore(entry github.TreeEntry) *Gitignore {
+// New builds a new Template struct from a GitHub TreeEntry. Returns nil if
+// the entry doesn't point to a Gitignore template.
+func New(entry github.TreeEntry) *Template {
 	Size := uint64(entry.GetSize())
 	Path := entry.GetPath()
 	SHA := entry.GetSHA()
@@ -33,13 +38,12 @@ func (s *State) makeGitignore(entry github.TreeEntry) *Gitignore {
 		dir = strings.TrimRight(dir, "/")
 		Tags := strings.Split(dir, "/")
 
-		return &Gitignore{
+		return &Template{
 			Name,
 			Size,
 			Path,
 			Tags,
 			SHA,
-			s,
 		}
 	}
 
