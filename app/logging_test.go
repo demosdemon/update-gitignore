@@ -7,6 +7,7 @@ import (
 
 func TestMain(m *testing.M) {
 	shutdown := InitLogging()
-	defer shutdown()
-	os.Exit(m.Run())
+	exit := m.Run()
+	shutdown()
+	os.Exit(exit)
 }
