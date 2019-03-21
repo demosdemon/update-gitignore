@@ -73,6 +73,21 @@ func TestClient(t *testing.T) {
 	})
 }
 
+func TestTree(t *testing.T) {
+	ctx := context.Background()
+	ctx, cancel := context.WithTimeout(ctx, time.Minute*5)
+	defer cancel()
+
+	state := NewState([]string{"-list"})
+	ch := state.Tree(ctx)
+	for x := range ch {
+		assert.Contains(t, x.Path, ".gitignore")
+		if len(x.Tags) > 0 {
+			assert.NotEqual(t, "", x.Tags[0])
+		}
+	}
+}
+
 func TestTreeUnrealisticTimeout(t *testing.T) {
 	ctx := context.Background()
 	state := NewState([]string{"-debug", "-list"})

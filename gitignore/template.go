@@ -29,20 +29,17 @@ func New(entry github.TreeEntry) *Template {
 	SHA := entry.GetSHA()
 
 	if strings.HasSuffix(Path, Suffix) {
-		dir, basename := path.Split(Path)
+		_, basename := path.Split(Path)
 		Name := strings.TrimSuffix(basename, Suffix)
 		if Name == "" {
 			return nil
 		}
 
-		dir = strings.TrimRight(dir, "/")
-		Tags := strings.Split(dir, "/")
-
 		return &Template{
 			Name,
 			Size,
 			Path,
-			Tags,
+			nil,
 			SHA,
 		}
 	}
