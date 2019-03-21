@@ -10,7 +10,8 @@ import (
 	"github.com/demosdemon/update-gitignore/app"
 )
 
-func main() { // nocover
+func main() {
+	// notest
 	shutdown := app.InitLogging()
 	defer shutdown()
 

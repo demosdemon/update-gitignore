@@ -37,20 +37,22 @@ matrix:
     #       - '%USERPROFILE%\gopath\pkg\mod'
 
 before_install:
-  - go get golang.org/x/tools/cmd/cover
-  - go get github.com/mattn/goveralls
   - go get github.com/golangci/golangci-lint/cmd/golangci-lint@v1.15.0
-  - command -v goveralls
+  - go get -u github.com/mattn/goveralls
+  - go get -u github.com/dave/courtney
   - command -v golangci-lint
+  - command -v goveralls
+  - command -v courtney
 
 install:
-  - go mod download
+  - go get -t -v ./...
 
 script:
   - golangci-lint run
-  - make
-  - ls -l update-gitignore
-  - go test -v -covermode=count -coverprofile=coverage.out ./...
+  - courtney -v
+  - make build && ls -l update-gitignore && mkdir -p build && mv update-gitignore "build/update-gitignore-$(go env GOOS)-$(go env GOARCH)"
+
+after_success:
   - goveralls -coverprofile=coverage.out -service=travis-ci -repotoken $COVERALLS_TOKEN
 
 notifications:

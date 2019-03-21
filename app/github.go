@@ -58,12 +58,14 @@ func (s *State) GetBranchHead(ctx context.Context, branchName string) string {
 	}
 
 	commit := branch.Commit
-	if commit == nil { // nocover
+	if commit == nil {
+		// notest
 		panic(fmt.Errorf("got nil for branch.Commit: %#v", branch))
 	}
 
 	sha := commit.SHA
-	if sha == nil { // nocover
+	if sha == nil {
+		// notest
 		panic(fmt.Errorf("got nil for branch.Commit.SHA: %#v", branch))
 	}
 
@@ -94,6 +96,7 @@ func (s *State) getTree(ctx context.Context, sha string) <-chan *Template {
 					select {
 					case out <- gitignore:
 					case <-ctx.Done():
+						// notest
 						gomol.Warning("getTree loop canceled")
 						return
 					}
