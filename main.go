@@ -11,6 +11,7 @@ import (
 )
 
 func main() {
+	// nocover
 	shutdown := app.InitLogging()
 	defer shutdown()
 
