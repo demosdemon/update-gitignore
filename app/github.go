@@ -108,12 +108,8 @@ func (s *State) getTree(ctx context.Context, sha string) <-chan *gitignore.Templ
 					for v := range ch {
 						v.Path = fmt.Sprintf("%s/%s", entry.GetPath(), v.Path)
 						v.Tags = append(v.Tags, entry.GetPath())
-						select {
-						case out <- v:
-						case <-ctx.Done():
-							gomol.Warning("getTree loop canceled")
-							return
-						}
+						// don't need to test for ctx.Done because it's always caught above
+						out <- v
 					}
 					wg.Done()
 				}()
