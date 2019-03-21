@@ -96,9 +96,16 @@ func TestTreeCancelable(t *testing.T) {
 	ch := state.Tree(ctx)
 
 	x, ok := <-ch
-	cancel()
 	assert.True(t, ok)
 	assert.NotNil(t, x)
+	cancel()
+
+	i := 0
+	for range ch {
+		i++
+	}
+
+	assert.True(t, 5 <= i || i <= 6)
 }
 
 func TestTreeUnrealisticTimeout(t *testing.T) {

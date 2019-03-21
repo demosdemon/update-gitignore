@@ -75,7 +75,7 @@ func (s *State) GetBranchHead(ctx context.Context, branchName string) string {
 }
 
 func (s *State) getTree(ctx context.Context, sha string) <-chan *gitignore.Template {
-	out := make(chan *gitignore.Template)
+	out := make(chan *gitignore.Template, 5)
 
 	go func() {
 		defer close(out)
