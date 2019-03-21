@@ -17,7 +17,7 @@ func stringOrError(call func() (string, error)) string {
 
 // InitLogging initializes the gomol logging system for the application. Returns
 // a shutdown function that should be called before the app terminates.
-func InitLogging() func() {
+func InitLogging() func() error {
 	consoleCfg := gc.NewConsoleLoggerConfig()
 	consoleCfg.Writer = os.Stderr
 
@@ -33,7 +33,9 @@ func InitLogging() func() {
 		panic(err)
 	}
 
-	return func() {
-		gomol.ShutdownLoggers()
-	}
+	return shutdownLoggers
+}
+
+func shutdownLoggers() error {
+	return gomol.ShutdownLoggers()
 }

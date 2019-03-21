@@ -12,7 +12,11 @@ import (
 
 func main() {
 	shutdown := app.InitLogging()
-	defer shutdown()
+	defer func() {
+		if err := shutdown(); err != nil {
+			panic(err)
+		}
+	}()
 
 	state := app.NewState(os.Args[1:])
 

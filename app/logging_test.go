@@ -8,6 +8,8 @@ import (
 func TestMain(m *testing.M) {
 	shutdown := InitLogging()
 	exit := m.Run()
-	shutdown()
+	if err := shutdown(); err != nil {
+		panic(err)
+	}
 	os.Exit(exit)
 }
