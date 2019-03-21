@@ -45,7 +45,7 @@ before_install:
   - command -v courtney
 
 install:
-  - go get -t -v ./...
+  - go mod download
 
 script:
   - golangci-lint run
