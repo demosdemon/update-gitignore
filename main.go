@@ -10,10 +10,12 @@ import (
 	"github.com/demosdemon/update-gitignore/app"
 )
 
+var args = os.Args[1:]
+
 func main() {
 	defer app.PanicOnError(app.InitLogging())
 
-	state := app.NewState(os.Args[1:])
+	state := app.NewState(args)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Minute*5)
 	defer cancel()
