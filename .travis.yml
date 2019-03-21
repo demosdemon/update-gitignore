@@ -9,36 +9,18 @@ env:
     - secure: tpvs8vlig7dUsGbGcajyX/FP7tFwhjm1DLcQWRkrznR4n6T2Nx+OLfqrmcEl/hHqdcH78vkCpsezy4JMeaFHvNBKMBV/YEhXwFMNJ1FzAPrDRXRFWyqxkYMT3lmWBJAfupdz2XTNxDKsLhyU02fxDKJsXmlNDw/pwURX2ds1ER0UouxFnFhb9WLwYA+WxcixgwNHv8zXIbiS29R9ckolr6Ofv6kZ4rKOCF6nY4vA9mnImAHGBcSsl89CqiyhQbGcTcxUmOZN19+kCkxTLXyWyAFMLd9XXXlYLoE2hWpsG+dUW5nlfnUBcvILb03sB/BOhMyJPoovfFf1Jphyb/v9A8LbB4rvPbJ40hHBhMs8gVcA3hNiYTLST7e0m/KzOhvddIrQeqClGLY0Sm9FCLBKBVrijwxza3wTc4QWpflTlERgNi7XQ6sHXya3F4rnWp6PY7HwvwsJdZY1HYlF1P0DIMFbDKaUegWUE4Bn2DTEhppn1W22D266Wa0BMksgJ5NLVLrPrjATMejwNNKOdUlc9FDuGqn1QQThXGRJEAQUyC8C4w3/64omijVSyBu4cotHlihZyfvmyQ1ugUZz6HlVZ1mc0oyBbRMx6rbEBq4ICzc7YIx5R4alAwYNbTyUY076GnqXlfm4utJbuWO6w8oSWyxhs1oAnWMsJmOaY3+WM1w=
     - secure: ZbH1WOIF7NXzGNlNUwpuuKcYxigJRoz1qSel1RbcfcqI/G1S6Ri24kcWNIJdq9uaXUbhC7zuU+Q4sA2jnJZr+v81+esCF8GQhia0mUk2tkoZBInmGiqbgGaJIbwLLJBgasYkO4RelyN5aPbf/tj736LKm8oKJoNY5R5XlLWMayeJdN2fjqCodyHYH9GqQgHwbNfDn/e15pPIUICShkhLBlhzx5FcccM2qo1WRZzNe4XqQIGKaCYZ2j8fTGHOaOC2mpfDfbY8LwzmmCWZWtztecuQsys3AOqyBUxzr66B9lDSNabIYUure4w38v/KxwvwqCE2rIIKChz/tXRBH5QKZsJnrP83fm+uY93/KboWzavcOhpJLE34zqXhVeJ3tzHEs+BZsuHRrNNakRnH1KIlUu830B2Wx451cQ4M+qx2/xPbKuzz762g4dQIlkVqOmv2uMXB+Kb0sKx2VO5ODz2MHT6No1Ii764QkY5x9z2Qkr3YG3oqLGgi8T10oY4ByQz9uchvQxvsswaHpp82GdgGimL4CPEIqVzBsWfN/lDeWRRlhhhVORWBtmyVizltu3SlSahXsgfGslDmuMqOpL4x3aLr219ndgRrwxldZUlbeKiU5LayBD27acaiZR7RpstIN3QcqE6i/J89kP57dmd2L+ATjO7Biw4HzOHmKFyUFhc=
 
+go:
+  - 1.12.x
+  - master
+
+os:
+  - linux
+  - osx
+
 matrix:
   fast_finish: true
   allow_failures:
     - go: master
-    - os: windows
-  include:
-    - os: linux
-      go: 1.12.x
-      cache: &linuxCache
-        directories:
-          - $HOME/.cache/go-build
-          - $HOME/gopath/pkg/mod
-    - os: linux
-      go: master
-      cache: *linuxCache
-    - os: osx
-      go: 1.12.x
-      cache: &macosCache
-        directories:
-          - $HOME/Library/Caches/go-build
-          - $HOME/gopath/pkg/mod
-    - os: osx
-      go: master
-      cache: *macosCache
-    # - os: windows
-    #   go: 1.12.x
-    #   cache:
-    #     directories:
-    #       - '%USERPROFILE%\AppData\Local\go-build'
-    #       - '%USERPROFILE%\gopath\pkg\mod'
 
 before_install:
   - go get github.com/golangci/golangci-lint/cmd/golangci-lint@v1.15.0
