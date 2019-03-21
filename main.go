@@ -11,7 +11,6 @@ import (
 )
 
 func main() {
-	// notest
 	shutdown := app.InitLogging()
 	defer shutdown()
 

@@ -36,11 +36,11 @@ func (s *State) Tree(ctx context.Context) <-chan *Template {
 
 // GetDefaultBranch returns the default branch for the selected GitHub repo.
 func (s *State) GetDefaultBranch(ctx context.Context) string {
+	defer PanicUnlessCanceled(ctx)
 	repo, _, err := s.Client(ctx).Repositories.Get(ctx, s.Owner, s.Repo)
 	if err != nil {
 		gomol.Fatalf("Error fetching repo %s/%s.", s.Owner, s.Repo)
-		panicUnlessCanceled(ctx, err)
-		return ""
+		panic(err)
 	}
 
 	rv := repo.GetDefaultBranch()
@@ -50,22 +50,20 @@ func (s *State) GetDefaultBranch(ctx context.Context) string {
 
 // GetBranchHead returns the SHA of the
 func (s *State) GetBranchHead(ctx context.Context, branchName string) string {
+	defer PanicUnlessCanceled(ctx)
 	branch, _, err := s.Client(ctx).Repositories.GetBranch(ctx, s.Owner, s.Repo, branchName)
 	if err != nil {
 		gomol.Fatalf("Error fetching branch %s for repo %s/%s.", branchName, s.Owner, s.Repo)
-		panicUnlessCanceled(ctx, err)
-		return ""
+		panic(err)
 	}
 
 	commit := branch.Commit
 	if commit == nil {
-		// notest
 		panic(fmt.Errorf("got nil for branch.Commit: %#v", branch))
 	}
 
 	sha := commit.SHA
 	if sha == nil {
-		// notest
 		panic(fmt.Errorf("got nil for branch.Commit.SHA: %#v", branch))
 	}
 
@@ -78,14 +76,14 @@ func (s *State) getTree(ctx context.Context, sha string) <-chan *Template {
 	out := make(chan *Template, 5)
 
 	go func() {
+		defer PanicUnlessCanceled(ctx)
 		defer close(out)
 		wg := new(sync.WaitGroup)
 
 		tree, _, err := s.Client(ctx).Git.GetTree(ctx, s.Owner, s.Repo, sha, false)
 		if err != nil {
 			gomol.Fatalf("Error fetching tree %s", sha)
-			panicUnlessCanceled(ctx, err)
-			return
+			panic(err)
 		}
 
 		for _, entry := range tree.Entries {
@@ -96,9 +94,7 @@ func (s *State) getTree(ctx context.Context, sha string) <-chan *Template {
 					select {
 					case out <- gitignore:
 					case <-ctx.Done():
-						// notest
-						gomol.Warning("getTree loop canceled")
-						return
+						panic(ctx.Err())
 					}
 				}
 			case "tree":
@@ -114,7 +110,7 @@ func (s *State) getTree(ctx context.Context, sha string) <-chan *Template {
 					}
 					wg.Done()
 				}()
-			default: // nocover
+			default:
 				gomol.Warningf("Unknown tree entry type %s %#v", Type, entry)
 			}
 		}
@@ -122,14 +118,4 @@ func (s *State) getTree(ctx context.Context, sha string) <-chan *Template {
 	}()
 
 	return out
-}
-
-func panicUnlessCanceled(ctx context.Context, err error) {
-	select {
-	case <-ctx.Done():
-		gomol.Warning(err.Error())
-		return
-	default:
-		panic(err)
-	}
 }
