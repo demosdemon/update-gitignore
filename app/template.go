@@ -1,4 +1,4 @@
-package gitignore
+package app
 
 import (
 	"path"
@@ -23,7 +23,7 @@ type Template struct {
 
 // New builds a new Template struct from a GitHub TreeEntry. Returns nil if
 // the entry doesn't point to a Gitignore template.
-func New(entry github.TreeEntry) *Template {
+func NewTemplate(entry github.TreeEntry) *Template {
 	Size := uint64(entry.GetSize())
 	Path := entry.GetPath()
 	SHA := entry.GetSHA()

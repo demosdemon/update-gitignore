@@ -9,8 +9,6 @@ import (
 	"github.com/aphistic/gomol"
 	"github.com/google/go-github/v24/github"
 	"golang.org/x/oauth2"
-
-	"github.com/demosdemon/update-gitignore/gitignore"
 )
 
 // Client fetches and caches a GitHub client. If the environment variable
@@ -30,7 +28,7 @@ func (s *State) Client(ctx context.Context) *github.Client {
 }
 
 // Tree yields the gitignore template files from the GitHub repo.
-func (s *State) Tree(ctx context.Context) <-chan *gitignore.Template {
+func (s *State) Tree(ctx context.Context) <-chan *Template {
 	branch := s.GetDefaultBranch(ctx)
 	commit := s.GetBranchHead(ctx, branch)
 	return s.getTree(ctx, commit)
@@ -74,8 +72,8 @@ func (s *State) GetBranchHead(ctx context.Context, branchName string) string {
 	return rv
 }
 
-func (s *State) getTree(ctx context.Context, sha string) <-chan *gitignore.Template {
-	out := make(chan *gitignore.Template, 5)
+func (s *State) getTree(ctx context.Context, sha string) <-chan *Template {
+	out := make(chan *Template, 5)
 
 	go func() {
 		defer close(out)
@@ -91,7 +89,7 @@ func (s *State) getTree(ctx context.Context, sha string) <-chan *gitignore.Templ
 		for _, entry := range tree.Entries {
 			switch Type := entry.GetType(); Type {
 			case "blob":
-				gitignore := gitignore.New(entry)
+				gitignore := NewTemplate(entry)
 				if gitignore != nil {
 					select {
 					case out <- gitignore:
