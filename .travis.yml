@@ -18,12 +18,16 @@ os:
   - linux
   - osx
 
+dist: xenial
+
 matrix:
   fast_finish: true
   allow_failures:
     - go: master
 
 before_install:
+  - pip install --upgrade awscli
+  - aws --version
   - curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sh -s -- -b "$(go env GOPATH)/bin" v1.15.0
   - golangci-lint --version
   - go get -u golang.org/x/tools/cmd/cover
@@ -42,7 +46,6 @@ after_success:
   - goveralls -coverprofile=coverage.out -service=travis-ci -repotoken $COVERALLS_TOKEN
 
 after_script:
-  - pip install --user --upgrade awscli
   - aws s3 cp ./update-gitignore "s3://$ARTIFACTS_BUCKET/$TRAVIS_REPO_SLUG/$TRAVIS_BUILD_NUMBER/$TRAVIS_GO_VERSION/update-gitignore-$(go env GOOS)-$(go env GOARCH)"
 
 notifications:
