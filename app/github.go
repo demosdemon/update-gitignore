@@ -123,10 +123,6 @@ func (s *State) getTree(ctx context.Context, sha string) <-chan *gitignore.Templ
 }
 
 func panicUnlessCanceled(ctx context.Context, err error) {
-	if err == nil {
-		return
-	}
-
 	select {
 	case <-ctx.Done():
 		gomol.Warning(err.Error())
