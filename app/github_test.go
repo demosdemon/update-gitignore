@@ -82,6 +82,7 @@ func TestTree(t *testing.T) {
 	ch := state.Tree(ctx)
 	for x := range ch {
 		assert.Contains(t, x.Path, ".gitignore")
+		assert.NotEqual(t, "", x.Name)
 		if len(x.Tags) > 0 {
 			assert.NotEqual(t, "", x.Tags[0])
 		}
