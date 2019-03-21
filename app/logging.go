@@ -37,5 +37,6 @@ func InitLogging() func() error {
 }
 
 func shutdownLoggers() error {
+	gomol.Warn("shutting down")
 	return gomol.ShutdownLoggers()
 }
