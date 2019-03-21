@@ -6,6 +6,6 @@ import (
 )
 
 func TestMain(m *testing.M) {
-	InitLogging()
+	defer InitLogging()()
 	os.Exit(m.Run())
 }
