@@ -21,19 +21,19 @@ func InitLogging() func() {
 	consoleCfg := gc.NewConsoleLoggerConfig()
 	consoleCfg.Writer = os.Stderr
 
-	if consoleLogger, err := gc.NewConsoleLogger(consoleCfg); err != nil {
+	if consoleLogger, err := gc.NewConsoleLogger(consoleCfg); err != nil { // nocover
 		panic(err)
 	} else {
 		tpl := gc.NewTemplateFull()
 		if tpl != nil {
-			if err := consoleLogger.SetTemplate(tpl); err != nil {
+			if err := consoleLogger.SetTemplate(tpl); err != nil { // nocover
 				panic(err)
 			}
 		}
 		gomol.AddLogger(consoleLogger)
 	}
 
-	if err := gomol.InitLoggers(); err != nil {
+	if err := gomol.InitLoggers(); err != nil { // nocover
 		panic(err)
 	}
 
