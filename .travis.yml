@@ -23,20 +23,21 @@ matrix:
     - go: master
 
 before_install:
-  - go get github.com/golangci/golangci-lint/cmd/golangci-lint@v1.15.0
+  - curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sh -s -- -b "$(go env GOPATH)/bin" v1.15.0
+  - golangci-lint --version
+  - go get -u golang.org/x/tools/cmd/cover
   - go get -u github.com/mattn/goveralls
-  - go get -u github.com/dave/courtney
-  - command -v golangci-lint
-  - command -v goveralls
-  - command -v courtney
 
 install:
   - go mod vendor
 
 script:
   - golangci-lint run
-  - courtney -v
-  - make build && ls -l update-gitignore && mkdir -p build && mv update-gitignore "build/update-gitignore-$(go env GOOS)-$(go env GOARCH)"
+  - go test -v -covermode=count -coverprofile=coverage.out ./...
+  - make build
+  - ls -l update-gitignore
+  - mkdir -p build
+  - mv update-gitignore "build/update-gitignore-$(go env GOOS)-$(go env GOARCH)"
 
 after_success:
   - goveralls -coverprofile=coverage.out -service=travis-ci -repotoken $COVERALLS_TOKEN
