@@ -58,12 +58,12 @@ func (s *State) GetBranchHead(ctx context.Context, branchName string) string {
 	}
 
 	commit := branch.Commit
-	if commit == nil {
+	if commit == nil { // nocover
 		panic(fmt.Errorf("got nil for branch.Commit: %#v", branch))
 	}
 
 	sha := commit.SHA
-	if sha == nil {
+	if sha == nil { // nocover
 		panic(fmt.Errorf("got nil for branch.Commit.SHA: %#v", branch))
 	}
 
@@ -111,7 +111,7 @@ func (s *State) getTree(ctx context.Context, sha string) <-chan *Template {
 					}
 					wg.Done()
 				}()
-			default:
+			default: // nocover
 				gomol.Warningf("Unknown tree entry type %s %#v", Type, entry)
 			}
 		}
