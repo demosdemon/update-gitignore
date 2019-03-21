@@ -26,7 +26,9 @@ matrix:
     - go: master
 
 before_install:
-  - pip install --upgrade awscli
+  - if [[ $TRAVIS_OS_NAME == linux ]]; then pip install --user --upgrade awscli; fi
+  - if [[ $TRAVIS_OS_NAME == osx ]]; then brew install awscli; fi
+  - if [[ $TRAVIS_OS_NAME == windows ]]; then exit -1; fi
   - aws --version
   - curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sh -s -- -b "$(go env GOPATH)/bin" v1.15.0
   - golangci-lint --version
