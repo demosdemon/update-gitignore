@@ -88,6 +88,19 @@ func TestTree(t *testing.T) {
 	}
 }
 
+func TestTreeCancelable(t *testing.T) {
+	ctx := context.Background()
+	ctx, cancel := context.WithCancel(ctx)
+
+	state := NewState([]string{"-list"})
+	ch := state.Tree(ctx)
+
+	x, ok := <-ch
+	cancel()
+	assert.True(t, ok)
+	assert.NotNil(t, x)
+}
+
 func TestTreeUnrealisticTimeout(t *testing.T) {
 	ctx := context.Background()
 	state := NewState([]string{"-debug", "-list"})
