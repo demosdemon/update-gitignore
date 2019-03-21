@@ -78,56 +78,54 @@ func TestClient(t *testing.T) {
 func TestTree(t *testing.T) {
 	defer PanicOnError(InitLogging())
 
-	ctx := context.Background()
-	ctx, cancel := context.WithTimeout(ctx, time.Minute*5)
-	defer cancel()
+	t.Run("Basics", func(t *testing.T) {
+		ctx := context.Background()
+		ctx, cancel := context.WithTimeout(ctx, time.Minute*5)
+		defer cancel()
 
-	state := NewState([]string{"-list"})
-	ch := state.Tree(ctx)
-	for x := range ch {
-		assert.Contains(t, x.Path, ".gitignore")
-		assert.NotEqual(t, "", x.Name)
-		if len(x.Tags) > 0 {
-			assert.NotEqual(t, "", x.Tags[0])
+		state := NewState([]string{"-list"})
+		ch := state.Tree(ctx)
+		for x := range ch {
+			assert.Contains(t, x.Path, ".gitignore")
+			assert.NotEqual(t, "", x.Name)
+			if len(x.Tags) > 0 {
+				assert.NotEqual(t, "", x.Tags[0])
+			}
 		}
-	}
-}
+	})
 
-func TestTreeCancelable(t *testing.T) {
-	defer PanicOnError(InitLogging())
+	t.Run("Cancelable", func(t *testing.T) {
+		ctx := context.Background()
+		ctx, cancel := context.WithCancel(ctx)
 
-	ctx := context.Background()
-	ctx, cancel := context.WithCancel(ctx)
+		state := NewState([]string{"-list"})
+		ch := state.Tree(ctx)
 
-	state := NewState([]string{"-list"})
-	ch := state.Tree(ctx)
+		x, ok := <-ch
+		assert.True(t, ok)
+		assert.NotNil(t, x)
+		cancel()
 
-	x, ok := <-ch
-	assert.True(t, ok)
-	assert.NotNil(t, x)
-	cancel()
+		i := 0
+		for range ch {
+			i++
+		}
 
-	i := 0
-	for range ch {
-		i++
-	}
+		assert.True(t, 5 <= i || i <= 6)
+	})
 
-	assert.True(t, 5 <= i || i <= 6)
-}
+	t.Run("Unrealistic timeout", func(t *testing.T) {
+		ctx := context.Background()
+		state := NewState([]string{"-debug", "-list"})
+		branch := state.GetDefaultBranch(ctx)
+		commit := state.GetBranchHead(ctx, branch)
 
-func TestTreeUnrealisticTimeout(t *testing.T) {
-	defer PanicOnError(InitLogging())
-
-	ctx := context.Background()
-	state := NewState([]string{"-debug", "-list"})
-	branch := state.GetDefaultBranch(ctx)
-	commit := state.GetBranchHead(ctx, branch)
-
-	ctx, cancel := context.WithTimeout(ctx, time.Microsecond)
-	defer cancel()
-	ch := state.getTree(ctx, commit)
-	_, ok := <-ch
-	assert.False(t, ok)
+		ctx, cancel := context.WithTimeout(ctx, time.Microsecond)
+		defer cancel()
+		ch := state.getTree(ctx, commit)
+		_, ok := <-ch
+		assert.False(t, ok)
+	})
 }
 
 func TestGetDefaultBranch(t *testing.T) {
