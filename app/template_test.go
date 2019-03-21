@@ -8,6 +8,8 @@ import (
 )
 
 func TestNewTemplate(t *testing.T) {
+	defer PanicOnError(InitLogging())
+
 	sha := "0000000000000000000000000000000000000000"
 	size := 42
 

@@ -2,10 +2,13 @@ package app
 
 import (
 	"os"
+	"sync"
 
 	"github.com/aphistic/gomol"
 	gc "gopkg.in/aphistic/gomol-console.v0"
 )
+
+var once = sync.Once{}
 
 func stringOrError(call func() (string, error)) string {
 	rv, err := call()
@@ -18,16 +21,18 @@ func stringOrError(call func() (string, error)) string {
 // InitLogging initializes the gomol logging system for the application. Returns
 // a shutdown function that should be called before the app terminates.
 func InitLogging() func() error {
-	consoleCfg := gc.NewConsoleLoggerConfig()
-	consoleCfg.Writer = os.Stderr
+	(&once).Do(func() {
+		consoleCfg := gc.NewConsoleLoggerConfig()
+		consoleCfg.Writer = os.Stderr
 
-	// err is always nil
-	consoleLogger, _ := gc.NewConsoleLogger(consoleCfg)
-	tpl := gc.NewTemplateFull()
-	if err := consoleLogger.SetTemplate(tpl); err != nil {
-		panic(err)
-	}
-	gomol.AddLogger(consoleLogger)
+		// err is always nil
+		consoleLogger, _ := gc.NewConsoleLogger(consoleCfg)
+		tpl := gc.NewTemplateFull()
+		if err := consoleLogger.SetTemplate(tpl); err != nil {
+			panic(err)
+		}
+		gomol.AddLogger(consoleLogger)
+	})
 
 	if err := gomol.InitLoggers(); err != nil {
 		panic(err)
@@ -39,4 +44,11 @@ func InitLogging() func() error {
 func shutdownLoggers() error {
 	gomol.Warn("shutting down")
 	return gomol.ShutdownLoggers()
+}
+
+// PanicOnErr panics if the function returns an error
+func PanicOnError(f func() error) {
+	if err := f(); err != nil {
+		panic(err)
+	}
 }

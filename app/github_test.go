@@ -34,6 +34,8 @@ func clearAndRestoreEnviron(f func()) {
 }
 
 func TestClient(t *testing.T) {
+	defer PanicOnError(InitLogging())
+
 	ctx := context.Background()
 	ctx, cancel := context.WithTimeout(ctx, time.Minute*30)
 	defer cancel()
@@ -74,6 +76,8 @@ func TestClient(t *testing.T) {
 }
 
 func TestTree(t *testing.T) {
+	defer PanicOnError(InitLogging())
+
 	ctx := context.Background()
 	ctx, cancel := context.WithTimeout(ctx, time.Minute*5)
 	defer cancel()
@@ -90,6 +94,8 @@ func TestTree(t *testing.T) {
 }
 
 func TestTreeCancelable(t *testing.T) {
+	defer PanicOnError(InitLogging())
+
 	ctx := context.Background()
 	ctx, cancel := context.WithCancel(ctx)
 
@@ -110,6 +116,8 @@ func TestTreeCancelable(t *testing.T) {
 }
 
 func TestTreeUnrealisticTimeout(t *testing.T) {
+	defer PanicOnError(InitLogging())
+
 	ctx := context.Background()
 	state := NewState([]string{"-debug", "-list"})
 	branch := state.GetDefaultBranch(ctx)
@@ -123,6 +131,8 @@ func TestTreeUnrealisticTimeout(t *testing.T) {
 }
 
 func TestGetDefaultBranch(t *testing.T) {
+	defer PanicOnError(InitLogging())
+
 	state := NewState([]string{"-dump", "Python"})
 
 	t.Run("cancelled", func(t *testing.T) {
@@ -149,6 +159,8 @@ func TestGetDefaultBranch(t *testing.T) {
 }
 
 func TestGetBranchHead(t *testing.T) {
+	defer PanicOnError(InitLogging())
+
 	t.Run("cancelled", func(t *testing.T) {
 		state := NewState([]string{"-debug", "-list"})
 		ctx := context.Background()

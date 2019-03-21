@@ -7,6 +7,8 @@ import (
 )
 
 func TestNewState(t *testing.T) {
+	defer PanicOnError(InitLogging())
+
 	assert.Panics(t, func() {
 		NewState([]string{"-repo", "invalid"})
 	})
