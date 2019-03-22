@@ -19,7 +19,6 @@ func TestRecoverFromPanic(t *testing.T) {
 	var obj struct{}
 
 	assert.NotPanics(t, func() {
-		defer close(ch)
 		defer RecoverFromPanic(ch)
 		panic(obj)
 	})

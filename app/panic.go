@@ -19,6 +19,7 @@ func RecoverFromPanic(ch chan<- error) {
 	if p := recover(); p != nil {
 		ch <- NewWrappedPanic(p)
 	}
+	close(ch)
 }
 
 func NewWrappedPanic(v interface{}) *WrappedPanic {
