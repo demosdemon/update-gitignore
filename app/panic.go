@@ -1,9 +1,9 @@
 package app
 
 import (
-	"bytes"
 	"fmt"
 	"runtime"
+	"strings"
 )
 
 type WrappedPanic struct {
@@ -23,31 +23,20 @@ func RecoverFromPanic(ch chan<- error) {
 
 func NewWrappedPanic(v interface{}) *WrappedPanic {
 	var buf [16384]byte
-	stack := buf[0:runtime.Stack(buf[:], false)]
+	stack := string(buf[0:runtime.Stack(buf[:], false)])
 	return &WrappedPanic{v, chopStack(stack, "panic(")}
 }
 
-func chopStack(s []byte, panicText string) string {
-	lfFirst := bytes.IndexByte(s, '\n')
-	if lfFirst == -1 {
-		return string(s)
-	}
+func chopStack(s, panicText string) string {
+	lines := strings.Split(s, "\n")
 
-	stack := s[lfFirst:]
-	f := []byte(panicText)
-	panicLine := bytes.Index(stack, f)
-	if panicLine == -1 {
-		return string(s)
-	}
-
-	stack = stack[panicLine+1:]
-	for i := 0; i < 2; i++ {
-		nextLine := bytes.IndexByte(stack, '\n')
-		if nextLine == -1 {
-			return string(s)
+	for idx := 1; idx < len(lines); idx++ {
+		line := lines[idx]
+		if strings.HasPrefix(line, panicText) {
+			idx += 2 // omit the part of the stack containing `recover` and `panic`
+			return fmt.Sprintf("%s\n%s", lines[0], strings.Join(lines[idx:], "\n"))
 		}
-		stack = stack[nextLine+1:]
 	}
 
-	return string(s[:lfFirst+1]) + string(stack)
+	return s
 }
