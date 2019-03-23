@@ -1,4 +1,4 @@
-package app
+package app_test
 
 import (
 	"context"
@@ -8,6 +8,8 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
+
+	"github.com/demosdemon/update-gitignore/app"
 )
 
 func clearAndRestoreEnviron(f func()) {
@@ -34,7 +36,7 @@ func clearAndRestoreEnviron(f func()) {
 }
 
 func TestClient(t *testing.T) {
-	defer PanicOnError(InitLogging())
+	defer app.PanicOnError(app.InitLogging())
 
 	ctx := context.Background()
 	ctx, cancel := context.WithTimeout(ctx, time.Minute*30)
@@ -44,14 +46,14 @@ func TestClient(t *testing.T) {
 	assert.True(t, ok, "Missing environment variable GITHUB_TOKEN")
 
 	t.Run("Test Client with nil state", func(t *testing.T) {
-		var state *State
+		var state *app.State
 		client := state.Client(ctx)
 		assert.Nil(t, client)
 	})
 
 	t.Run("Test Client with no environment", func(t *testing.T) {
 		clearAndRestoreEnviron(func() {
-			var state = State{}
+			var state = app.State{}
 			client := state.Client(ctx)
 
 			rl, _, err := client.RateLimits(ctx)
@@ -65,7 +67,7 @@ func TestClient(t *testing.T) {
 			err := os.Setenv("GITHUB_TOKEN", token)
 			assert.NoError(t, err)
 
-			state := State{}
+			state := app.State{}
 			client := state.Client(ctx)
 
 			rl, _, err := client.RateLimits(ctx)
@@ -76,14 +78,15 @@ func TestClient(t *testing.T) {
 }
 
 func TestTree(t *testing.T) {
-	defer PanicOnError(InitLogging())
+	defer app.PanicOnError(app.InitLogging())
 
 	t.Run("Basics", func(t *testing.T) {
 		ctx := context.Background()
 		ctx, cancel := context.WithTimeout(ctx, time.Minute*5)
 		defer cancel()
 
-		state := NewState([]string{"-list"})
+		state, err := app.NewState(ctx, []string{"-list"}, os.Stdout)
+		assert.NoError(t, err)
 		ch := state.Tree(ctx)
 		for x := range ch {
 			assert.Contains(t, x.Path, ".gitignore")
@@ -98,7 +101,8 @@ func TestTree(t *testing.T) {
 		ctx := context.Background()
 		ctx, cancel := context.WithCancel(ctx)
 
-		state := NewState([]string{"-list"})
+		state, err := app.NewState(ctx, []string{"-list"}, os.Stdout)
+		assert.NoError(t, err)
 		ch := state.Tree(ctx)
 
 		x, ok := <-ch
@@ -113,28 +117,16 @@ func TestTree(t *testing.T) {
 
 		assert.True(t, 5 <= i || i <= 6)
 	})
-
-	t.Run("Unrealistic timeout", func(t *testing.T) {
-		ctx := context.Background()
-		state := NewState([]string{"-debug", "-list"})
-		branch := state.GetDefaultBranch(ctx)
-		commit := state.GetBranchHead(ctx, branch)
-
-		ctx, cancel := context.WithTimeout(ctx, time.Microsecond)
-		defer cancel()
-		ch := state.getTree(ctx, commit)
-		_, ok := <-ch
-		assert.False(t, ok)
-	})
 }
 
 func TestGetDefaultBranch(t *testing.T) {
-	defer PanicOnError(InitLogging())
+	defer app.PanicOnError(app.InitLogging())
 
-	state := NewState([]string{"-dump", "Python"})
+	ctx := context.Background()
+	state, err := app.NewState(ctx, []string{"-dump", "Python"}, os.Stdout)
+	assert.NoError(t, err)
 
 	t.Run("cancelled", func(t *testing.T) {
-		ctx := context.Background()
 		ctx, cancel := context.WithCancel(ctx)
 		cancel()
 
@@ -142,13 +134,11 @@ func TestGetDefaultBranch(t *testing.T) {
 		assert.EqualValues(t, "", branch)
 	})
 	t.Run("not cancelled", func(t *testing.T) {
-		ctx := context.Background()
 		branch := state.GetDefaultBranch(ctx)
 		assert.EqualValues(t, "master", branch)
 	})
 	t.Run("invalid repo", func(t *testing.T) {
-		ctx := context.Background()
-		state := State{Owner: "demosdemon", Repo: "thisrepodoesnotexist"}
+		state := app.State{Owner: "demosdemon", Repo: "thisrepodoesnotexist"}
 
 		assert.Panics(t, func() {
 			_ = state.GetDefaultBranch(ctx)
@@ -158,11 +148,13 @@ func TestGetDefaultBranch(t *testing.T) {
 }
 
 func TestGetBranchHead(t *testing.T) {
-	defer PanicOnError(InitLogging())
+	defer app.PanicOnError(app.InitLogging())
+
+	ctx := context.Background()
 
 	t.Run("cancelled", func(t *testing.T) {
-		state := NewState([]string{"-debug", "-list"})
-		ctx := context.Background()
+		state, err := app.NewState(ctx, []string{"-debug", "-list"}, os.Stdout)
+		assert.NoError(t, err)
 		ctx, cancel := context.WithCancel(ctx)
 		cancel()
 
@@ -170,17 +162,13 @@ func TestGetBranchHead(t *testing.T) {
 		assert.EqualValues(t, "", commit)
 	})
 	t.Run("not cancelled", func(t *testing.T) {
-		ctx := context.Background()
 		// intentionally defunct repo in attempt to make the sha constant
-		state := State{Owner: "demosdemon", Repo: "CheckBuyvm"}
-
+		state := app.State{Owner: "demosdemon", Repo: "CheckBuyvm"}
 		commit := state.GetBranchHead(ctx, "master")
 		assert.EqualValues(t, "251502fe2ce94571548baf1710cde2beca037d57", commit)
 	})
 	t.Run("invalid repo", func(t *testing.T) {
-		ctx := context.Background()
-		state := State{Owner: "demosdemon", Repo: "thisrepodoesnotexist"}
-
+		state := app.State{Owner: "demosdemon", Repo: "thisrepodoesnotexist"}
 		assert.Panics(t, func() {
 			_ = state.GetBranchHead(ctx, "master")
 			panic(assert.AnError) // TODO: fix test

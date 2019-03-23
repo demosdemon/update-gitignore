@@ -10,14 +10,6 @@ import (
 
 var once = sync.Once{}
 
-func stringOrError(call func() (string, error)) string {
-	rv, err := call()
-	if err == nil {
-		return rv
-	}
-	return err.Error()
-}
-
 // InitLogging initializes the gomol logging system for the application. Returns
 // a shutdown function that should be called before the app terminates.
 func InitLogging() func() error {

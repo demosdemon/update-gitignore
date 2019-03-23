@@ -3,25 +3,36 @@ package main
 import (
 	"context"
 	"fmt"
+	"io"
 	"os"
 	"regexp"
 	"strings"
 	"sync"
-	"time"
+
+	"github.com/gosuri/uitable"
 
 	"github.com/demosdemon/update-gitignore/app"
-	"github.com/gosuri/uitable"
 )
 
 var args = os.Args[1:]
+var stdout io.Writer = os.Stdout
+var stderr io.Writer = os.Stderr
+
+type sysexit func(code int)
+
+var exit sysexit = os.Exit
 
 func main() {
 	defer app.PanicOnError(app.InitLogging())
 
-	state := app.NewState(args)
-
-	ctx, cancel := context.WithTimeout(context.Background(), time.Minute*5)
+	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
+	state, err := app.NewState(ctx, args, stderr)
+	if err != nil {
+		fmt.Fprintf(stderr, "error initializing state: %v\n", err)
+		exit(2)
+	}
+
 	tree := state.Tree(ctx)
 
 	switch {
@@ -37,18 +48,18 @@ func list(ch <-chan *app.Template, templates ...string) {
 	table.AddRow("NAME", "SIZE", "TAGS", "SHA")
 	for tpl := range ch {
 		if f(tpl) {
-			table.AddRow(tpl.Name, tpl.Size, comma(tpl.Tags...), tpl.SHA)
+			table.AddRow(tpl.Name, tpl.Size, comma(tpl.Tags), tpl.SHA)
 		}
 	}
-	fmt.Println(table)
+	fmt.Fprintln(stdout, table)
 }
 
-func comma(v ...string) string {
+func comma(v []string) string {
 	return strings.Join(v, ", ")
 }
 
 func filter(v []string) func(*app.Template) bool {
-	pattern := fmt.Sprintf("(?i)(%s)", strings.Join(apply(regexp.QuoteMeta, v...), "|"))
+	pattern := fmt.Sprintf("(?i)(%s)", strings.Join(apply(regexp.QuoteMeta, v), "|"))
 	re := regexp.MustCompile(pattern)
 	return func(tpl *app.Template) bool {
 		if re.Match([]byte(tpl.Name)) {
@@ -63,7 +74,7 @@ func filter(v []string) func(*app.Template) bool {
 	}
 }
 
-func apply(f func(string) string, v ...string) []string {
+func apply(f func(string) string, v []string) []string {
 	wg := new(sync.WaitGroup)
 	wg.Add(len(v))
 
