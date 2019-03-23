@@ -12,17 +12,15 @@ import (
 )
 
 var (
-	// ErrInvalidRepo is returned when the command line argument for `-repo` does not match the
-	// pattern "<owner>/<repository>"
+	// ErrInvalidRepo is returned when the command line argument for `-repo` does not match the pattern
+	// "<owner>/<repository>"
 	ErrInvalidRepo = errors.New("invalid repo")
-	// ErrInvalidTimeout is returned when the command line argument for `-timeout` is less than
-	// zero. Zero is valid and indicates no timeout
+	// ErrInvalidTimeout is returned when the command line argument for `-timeout` is less than zero. Zero is valid and
+	// indicates no timeout
 	ErrInvalidTimeout = errors.New("invalid timeout")
-	// ErrMutuallyExclusiveOption is returned when both `-list` and `-dump` are provided in the
-	// command line arguments
+	// ErrMutuallyExclusiveOption is returned when both `-list` and `-dump` are provided in the command line arguments
 	ErrMutuallyExclusiveOption = errors.New("-list and -dump are mutually exclusive")
-	// ErrActionRequired is returned when neither `-list` or `-dump` are provided in the command
-	// line arguments
+	// ErrActionRequired is returned when neither `-list` or `-dump` are provided in the command line arguments
 	ErrActionRequired = errors.New("one of -list or -dump is required")
 	// ErrActionArguments is returned when `-dump` is specified with no additional arguments
 	ErrActionArguments = errors.New("-dump requires at least one argument")
@@ -30,14 +28,11 @@ var (
 
 // The State of the application.
 type State struct {
-	// Debug holds a boolean value depicting whether or not `-debug` was provided as a command line
-	// argument
+	// Debug holds a boolean value depicting whether or not `-debug` was provided as a command line argument
 	Debug bool
-	// Dump holds a boolean value depicting whether or not `-dump` was provided as a command line
-	// argument
+	// Dump holds a boolean value depicting whether or not `-dump` was provided as a command line argument
 	Dump bool
-	// List holds a boolean value depicting whether or not `-list` was provided as a command line
-	// argument
+	// List holds a boolean value depicting whether or not `-list` was provided as a command line argument
 	List bool
 	// Templates is a string slice containing any additional command line arguments
 	Templates []string
@@ -47,15 +42,15 @@ type State struct {
 	// Repo holds the parsed repository value from the `-repo` command line flag
 	Repo string
 
-	// Context holds the executing context for the application. Context may have a deadline
-	// associated if `-timeout` was provided on the command line
+	// Context holds the executing context for the application. Context may have a deadline associated if `-timeout` was
+	// provided on the command line
 	Context context.Context
 	// Cancel holds the function necessary to cancel the context early, if so desired
 	Cancel context.CancelFunc
 }
 
-// NewState builds a new application state object, attaches the supplied context, and parses the
-// supplied command line arguments
+// NewState builds a new application state object, attaches the supplied context, and parses the supplied command line
+// arguments
 func NewState(ctx context.Context, arguments []string, output io.Writer) (*State, error) {
 	fs := flag.NewFlagSet("update-gitignore", flag.ContinueOnError)
 	fs.SetOutput(output)

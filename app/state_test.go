@@ -13,32 +13,32 @@ import (
 	"github.com/demosdemon/update-gitignore/app"
 )
 
-var ctx = context.Background()
-var usage = chain(
-	"Usage of update-gitignore:\n",
-	usageLine(
-		"-debug",
-		"print debug statements to STDERR",
-	),
-	usageLine(
-		"-dump",
-		"dump the specified templates to STDOUT",
-	),
-	usageLine(
-		"-list",
-		chain(
-			"list the available templates; if any, provided arguments are used to filter ",
-			"the results",
+var (
+	ctx = context.Background()
+
+	usage = chain(
+		"Usage of update-gitignore:\n",
+		usageLine(
+			"-debug",
+			"print debug statements to STDERR",
 		),
-	),
-	usageLine(
-		"-repo string",
-		"the template repository to use (default \"github/gitignore\")",
-	),
-	usageLine(
-		"-timeout duration",
-		"the max runtime duration, set to 0 for no timeout (default 30s)",
-	),
+		usageLine(
+			"-dump",
+			"dump the specified templates to STDOUT",
+		),
+		usageLine(
+			"-list",
+			"list the available templates; if any, provided arguments are used to filter the results",
+		),
+		usageLine(
+			"-repo string",
+			"the template repository to use (default \"github/gitignore\")",
+		),
+		usageLine(
+			"-timeout duration",
+			"the max runtime duration, set to 0 for no timeout (default 30s)",
+		),
+	)
 )
 
 func TestNewStateInvalidArguments(t *testing.T) {
@@ -64,7 +64,6 @@ func TestNewStateInvalidTimeout(t *testing.T) {
 	assert.Nil(t, state)
 	assert.EqualError(t, err, "invalid timeout")
 	assert.Equal(t, "", w.String())
-
 }
 
 func TestNewStateNoTimeoutArg(t *testing.T) {
@@ -100,7 +99,6 @@ func TestNewStateHighTimeout(t *testing.T) {
 	deadline, ok := state.Context.Deadline()
 	assert.True(t, ok)
 	assert.WithinDuration(t, expected, deadline, time.Millisecond)
-
 }
 
 func TestNewStateNoArguments(t *testing.T) {
@@ -109,7 +107,6 @@ func TestNewStateNoArguments(t *testing.T) {
 	assert.Nil(t, state)
 	assert.EqualError(t, err, "one of -list or -dump is required")
 	assert.Equal(t, "", w.String())
-
 }
 
 func TestNewStateWithBothListAndDump(t *testing.T) {
@@ -118,7 +115,6 @@ func TestNewStateWithBothListAndDump(t *testing.T) {
 	assert.Nil(t, state)
 	assert.EqualError(t, err, "-list and -dump are mutually exclusive")
 	assert.Equal(t, "", w.String())
-
 }
 
 func TestNewStateWithDumpAndNoArguments(t *testing.T) {
@@ -127,7 +123,6 @@ func TestNewStateWithDumpAndNoArguments(t *testing.T) {
 	assert.Nil(t, state)
 	assert.EqualError(t, err, "-dump requires at least one argument")
 	assert.Equal(t, "", w.String())
-
 }
 
 func TestPrintDebug(t *testing.T) {
