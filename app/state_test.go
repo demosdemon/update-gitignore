@@ -104,7 +104,7 @@ func TestNewStateHighTimeout(t *testing.T) {
 func TestNewStateNoArguments(t *testing.T) {
 	w := strings.Builder{}
 	state, err := app.NewState(ctx, []string{}, &w)
-	assert.Nil(t, state)
+	assert.NotNil(t, state)
 	assert.EqualError(t, err, "one of -list or -dump is required")
 	assert.Equal(t, "", w.String())
 }
@@ -112,7 +112,7 @@ func TestNewStateNoArguments(t *testing.T) {
 func TestNewStateWithBothListAndDump(t *testing.T) {
 	w := strings.Builder{}
 	state, err := app.NewState(ctx, []string{"-list", "-dump", "go"}, &w)
-	assert.Nil(t, state)
+	assert.NotNil(t, state)
 	assert.EqualError(t, err, "-list and -dump are mutually exclusive")
 	assert.Equal(t, "", w.String())
 }
@@ -120,7 +120,7 @@ func TestNewStateWithBothListAndDump(t *testing.T) {
 func TestNewStateWithDumpAndNoArguments(t *testing.T) {
 	w := strings.Builder{}
 	state, err := app.NewState(ctx, []string{"-dump"}, &w)
-	assert.Nil(t, state)
+	assert.NotNil(t, state)
 	assert.EqualError(t, err, "-dump requires at least one argument")
 	assert.Equal(t, "", w.String())
 }

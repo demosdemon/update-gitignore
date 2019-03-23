@@ -5,10 +5,15 @@ import (
 	"errors"
 	"flag"
 	"io"
+	"net/http"
+	"os"
 	"strings"
+	"sync"
 	"time"
 
+	"github.com/google/go-github/v24/github"
 	"github.com/gosuri/uitable"
+	"golang.org/x/oauth2"
 )
 
 var (
@@ -47,6 +52,10 @@ type State struct {
 	Context context.Context
 	// Cancel holds the function necessary to cancel the context early, if so desired
 	Cancel context.CancelFunc
+
+	mu     sync.Mutex
+	client *github.Client
+	token  *oauth2.Token
 }
 
 // NewState builds a new application state object, attaches the supplied context, and parses the supplied command line
@@ -55,71 +64,69 @@ func NewState(ctx context.Context, arguments []string, output io.Writer) (*State
 	fs := flag.NewFlagSet("update-gitignore", flag.ContinueOnError)
 	fs.SetOutput(output)
 
-	state := &State{}
-	fs.BoolVar(&state.Debug, "debug", false, "print debug statements to STDERR")
-	fs.BoolVar(&state.Dump, "dump", false, "dump the specified templates to STDOUT")
-	fs.BoolVar(
-		&state.List,
+	debug := fs.Bool("debug", false, "print debug statements to STDERR")
+	dump := fs.Bool("dump", false, "dump the specified templates to STDOUT")
+	list := fs.Bool(
 		"list",
 		false,
 		"list the available templates; if any, provided arguments are used to filter the results",
 	)
 	repo := fs.String("repo", "github/gitignore", "the template repository to use")
-	timeout := fs.Duration(
-		"timeout",
-		time.Second*30,
-		"the max runtime duration, set to 0 for no timeout",
-	)
+	timeout := fs.Duration("timeout", time.Second*30, "the max runtime duration, set to 0 for no timeout")
 
 	if err := fs.Parse(arguments); err != nil {
 		return nil, err
 	}
 
-	if err := state.setRepo(*repo); err != nil {
-		return nil, err
-	}
-
-	if err := state.setTimeout(ctx, *timeout); err != nil {
-		return nil, err
-	}
-
-	state.Templates = fs.Args()
-
-	if state.Dump && state.List {
-		return nil, ErrMutuallyExclusiveOption
-	}
-
-	if !state.Dump && !state.List {
-		return nil, ErrActionRequired
-	}
-
-	if state.Dump && len(state.Templates) < 1 {
-		return nil, ErrActionArguments
-	}
-
-	return state, nil
-}
-
-func (s *State) setRepo(repo string) error {
-	slice := strings.SplitN(repo, "/", 2)
+	slice := strings.SplitN(*repo, "/", 2)
 	if len(slice) < 2 {
-		return ErrInvalidRepo
+		return nil, ErrInvalidRepo
 	}
 
-	s.Owner = slice[0]
-	s.Repo = slice[1]
-	return nil
+	if *timeout < 0 {
+		return nil, ErrInvalidTimeout
+	}
+
+	var cancel context.CancelFunc
+
+	if *timeout > 0 {
+		ctx, cancel = context.WithTimeout(ctx, *timeout)
+	} else {
+		ctx, cancel = context.WithCancel(ctx)
+	}
+
+	var token *oauth2.Token
+
+	if tok, ok := os.LookupEnv("GITHUB_TOKEN"); ok {
+		token = &oauth2.Token{AccessToken: tok}
+	}
+
+	state := &State{
+		Debug:     *debug,
+		Dump:      *dump,
+		List:      *list,
+		Templates: fs.Args(),
+		Owner:     slice[0],
+		Repo:      slice[1],
+		Context:   ctx,
+		Cancel:    cancel,
+		token:     token,
+	}
+
+	return state, state.Validate(*repo, *timeout)
 }
 
-func (s *State) setTimeout(ctx context.Context, timeout time.Duration) error {
-	if timeout < 0 {
-		return ErrInvalidTimeout
+func (s *State) Validate(repo string, timeout time.Duration) error {
+	if s.Dump && s.List {
+		return ErrMutuallyExclusiveOption
 	}
 
-	if timeout > 0 {
-		s.Context, s.Cancel = context.WithTimeout(ctx, timeout)
-	} else {
-		s.Context, s.Cancel = context.WithCancel(ctx)
+	if !s.Dump && !s.List {
+		return ErrActionRequired
+	}
+
+	if s.Dump && len(s.Templates) < 1 {
+		return ErrActionArguments
 	}
 
 	return nil
@@ -145,4 +152,40 @@ func (s *State) PrintDebug(print func(...interface{}) error) error {
 	}
 
 	return nil
+}
+
+func (s *State) SetToken(token *oauth2.Token) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	if s.client != nil {
+		panic("a client has already been created with the previous key")
+	}
+
+	s.token = token
+}
+
+func (s *State) Token() (*oauth2.Token, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	if s.token == nil {
+		return nil, errors.New("no token")
+	}
+
+	return s.token, nil
+}
+
+func (s *State) Client() *github.Client {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	if s.client == nil {
+		var httpClient *http.Client
+		if s.token != nil {
+			httpClient = oauth2.NewClient(s.Context, s)
+		}
+		s.client = github.NewClient(httpClient)
+	}
+	return s.client
 }

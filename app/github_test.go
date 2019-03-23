@@ -3,37 +3,14 @@ package app_test
 import (
 	"context"
 	"os"
-	"strings"
 	"testing"
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	"golang.org/x/oauth2"
 
 	"github.com/demosdemon/update-gitignore/app"
 )
-
-func clearAndRestoreEnviron(f func()) {
-	environ := os.Environ()
-	os.Clearenv()
-
-	f()
-	// allow `f` to muck about with the environment
-	os.Clearenv()
-
-	for _, line := range environ {
-		if line == "" {
-			continue
-		}
-
-		split := strings.SplitN(line, "=", 2)
-		key := split[0]
-		if len(split) == 2 {
-			os.Setenv(key, split[1])
-		} else {
-			os.Setenv(key, "")
-		}
-	}
-}
 
 func TestClient(t *testing.T) {
 	defer app.PanicOnError(app.InitLogging())
@@ -45,35 +22,24 @@ func TestClient(t *testing.T) {
 	token, ok := os.LookupEnv("GITHUB_TOKEN")
 	assert.True(t, ok, "Missing environment variable GITHUB_TOKEN")
 
-	t.Run("Test Client with nil state", func(t *testing.T) {
-		var state *app.State
-		client := state.Client(ctx)
-		assert.Nil(t, client)
-	})
-
 	t.Run("Test Client with no environment", func(t *testing.T) {
-		clearAndRestoreEnviron(func() {
-			var state = app.State{}
-			client := state.Client(ctx)
+		var state = app.State{}
+		client := state.Client()
 
-			rl, _, err := client.RateLimits(ctx)
-			assert.NoError(t, err)
-			assert.Equal(t, 60, rl.Core.Limit)
-		})
+		rl, _, err := client.RateLimits(ctx)
+		assert.NoError(t, err)
+		assert.Equal(t, 60, rl.Core.Limit)
 	})
 
 	t.Run("Test Client with environment token", func(t *testing.T) {
-		clearAndRestoreEnviron(func() {
-			err := os.Setenv("GITHUB_TOKEN", token)
-			assert.NoError(t, err)
+		state := app.State{}
+		state.SetToken(&oauth2.Token{AccessToken: token})
 
-			state := app.State{}
-			client := state.Client(ctx)
+		client := state.Client()
 
-			rl, _, err := client.RateLimits(ctx)
-			assert.NoError(t, err)
-			assert.Truef(t, rl.Core.Limit >= 5000, "rl.Core.Limit < 5000: %d", rl.Core.Limit)
-		})
+		rl, _, err := client.RateLimits(ctx)
+		assert.NoError(t, err)
+		assert.Truef(t, rl.Core.Limit >= 5000, "rl.Core.Limit < 5000: %d", rl.Core.Limit)
 	})
 }
 
