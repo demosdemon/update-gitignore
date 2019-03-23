@@ -19,4 +19,9 @@ func TestMain(t *testing.T) {
 		args = []string{"-list", "-debug"}
 		assert.NotPanics(t, main)
 	})
+	t.Run("-dump", func(t *testing.T) {
+		args = []string{"-dump", "Go"}
+		assert.NotPanics(t, main)
+		// TODO: check stdout for expected output
+	})
 }

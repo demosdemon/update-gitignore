@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"os"
 	"regexp"
@@ -29,8 +28,6 @@ func main() {
 	case state.Dump:
 	case state.List:
 		list(tree, state.Templates...)
-	default:
-		panic(errors.New("how did we get here")) // nocover
 	}
 }
 
