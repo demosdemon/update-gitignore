@@ -36,11 +36,11 @@ func (s *State) Tree(ctx context.Context) <-chan *Template {
 
 // GetDefaultBranch returns the default branch for the selected GitHub repo.
 func (s *State) GetDefaultBranch(ctx context.Context) string {
-	defer PanicUnlessCanceled(ctx)
 	repo, _, err := s.Client(ctx).Repositories.Get(ctx, s.Owner, s.Repo)
 	if err != nil {
 		gomol.Fatalf("Error fetching repo %s/%s.", s.Owner, s.Repo)
-		panic(err)
+		// panic(err)
+		return ""
 	}
 
 	rv := repo.GetDefaultBranch()
@@ -50,21 +50,21 @@ func (s *State) GetDefaultBranch(ctx context.Context) string {
 
 // GetBranchHead returns the SHA of the
 func (s *State) GetBranchHead(ctx context.Context, branchName string) string {
-	defer PanicUnlessCanceled(ctx)
 	branch, _, err := s.Client(ctx).Repositories.GetBranch(ctx, s.Owner, s.Repo, branchName)
 	if err != nil {
 		gomol.Fatalf("Error fetching branch %s for repo %s/%s.", branchName, s.Owner, s.Repo)
-		panic(err)
+		// panic(err)
+		return "" // TODO: return error
 	}
 
 	commit := branch.Commit
 	if commit == nil {
-		panic(fmt.Errorf("got nil for branch.Commit: %#v", branch))
+		panic(fmt.Errorf("got nil for branch.Commit: %#v", branch)) // TODO: return error
 	}
 
 	sha := commit.SHA
 	if sha == nil {
-		panic(fmt.Errorf("got nil for branch.Commit.SHA: %#v", branch))
+		panic(fmt.Errorf("got nil for branch.Commit.SHA: %#v", branch)) // TODO: return error
 	}
 
 	rv := *sha
@@ -76,14 +76,14 @@ func (s *State) getTree(ctx context.Context, sha string) <-chan *Template {
 	out := make(chan *Template, 5)
 
 	go func() {
-		defer PanicUnlessCanceled(ctx)
 		defer close(out)
 		wg := new(sync.WaitGroup)
 
 		tree, _, err := s.Client(ctx).Git.GetTree(ctx, s.Owner, s.Repo, sha, false)
 		if err != nil {
 			gomol.Fatalf("Error fetching tree %s", sha)
-			panic(err)
+			// panic(err)
+			return // TODO: return error
 		}
 
 		for _, entry := range tree.Entries {
@@ -94,7 +94,8 @@ func (s *State) getTree(ctx context.Context, sha string) <-chan *Template {
 					select {
 					case out <- gitignore:
 					case <-ctx.Done():
-						panic(ctx.Err())
+						// panic(ctx.Err())
+						return // TODO: return error
 					}
 				}
 			case "tree":

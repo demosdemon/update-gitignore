@@ -1,4 +1,4 @@
-package app
+package async
 
 import (
 	"strings"
@@ -36,7 +36,7 @@ func TestRecoverFromPanic(t *testing.T) {
 	lines := strings.Split(wp.Stack, "\n")
 	assert.Contains(t, lines[0], "goroutine")
 	assert.Contains(t, lines[0], "[running]")
-	assert.Equal(t, "github.com/demosdemon/update-gitignore/app.TestRecoverFromPanic.func1()", lines[1])
+	assert.Equal(t, "github.com/demosdemon/update-gitignore/app/async.TestRecoverFromPanic.func1()", lines[1])
 
 	select {
 	case err, ok := <-ch:
@@ -45,4 +45,16 @@ func TestRecoverFromPanic(t *testing.T) {
 	default:
 		assert.Fail(t, "error channel was not closed")
 	}
+}
+
+func TestChopStackWithInvalidInput(t *testing.T) {
+	s := `
+		panic:
+
+		This is a string with many newlines
+
+		cool.
+		`
+
+	assert.Equal(t, s, chopStack(s, "panic("))
 }

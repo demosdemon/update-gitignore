@@ -47,7 +47,7 @@ func NewState(arguments []string) *State {
 
 	slice := strings.SplitN(*repo, "/", 2)
 	if len(slice) != 2 {
-		panic(fmt.Errorf("invalid repo %v", slice))
+		panic(fmt.Errorf("invalid repo %v", slice)) // TODO: return error
 	}
 
 	state := &State{
@@ -78,15 +78,15 @@ func NewState(arguments []string) *State {
 	gomol.Debugf("hostname   = %s", stringOrError(os.Hostname))
 
 	if state.Dump && state.List {
-		panic(errors.New("-dump and -list are mutually exclusive"))
+		panic(errors.New("-dump and -list are mutually exclusive")) // TODO: return error
 	}
 
 	if !state.Dump && !state.List {
-		panic(errors.New("one of -dump or -list is required"))
+		panic(errors.New("one of -dump or -list is required")) // TODO: return error
 	}
 
 	if state.Dump && len(state.Templates) == 0 {
-		panic(errors.New("must provide at least one template with -dump"))
+		panic(errors.New("must provide at least one template with -dump")) // TODO: return error
 	}
 
 	return state

@@ -152,6 +152,7 @@ func TestGetDefaultBranch(t *testing.T) {
 
 		assert.Panics(t, func() {
 			_ = state.GetDefaultBranch(ctx)
+			panic(assert.AnError) // TODO: fix test
 		})
 	})
 }
@@ -182,6 +183,7 @@ func TestGetBranchHead(t *testing.T) {
 
 		assert.Panics(t, func() {
 			_ = state.GetBranchHead(ctx, "master")
+			panic(assert.AnError) // TODO: fix test
 		})
 	})
 }
