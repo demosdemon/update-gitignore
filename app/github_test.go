@@ -104,8 +104,8 @@ func TestGetDefaultBranch(t *testing.T) {
 		assert.EqualValues(t, "master", branch)
 	})
 	t.Run("invalid repo", func(t *testing.T) {
-		state := app.State{Owner: "demosdemon", Repo: "thisrepodoesnotexist"}
-
+		state, err := app.NewState(ctx, []string{"-list", "-repo=demosdemon/thisrepodoesnotexist"}, os.Stdout)
+		assert.NoError(t, err)
 		assert.Panics(t, func() {
 			_ = state.GetDefaultBranch(ctx)
 			panic(assert.AnError) // TODO: fix test
@@ -129,12 +129,14 @@ func TestGetBranchHead(t *testing.T) {
 	})
 	t.Run("not cancelled", func(t *testing.T) {
 		// intentionally defunct repo in attempt to make the sha constant
-		state := app.State{Owner: "demosdemon", Repo: "CheckBuyvm"}
+		state, err := app.NewState(ctx, []string{"-list", "-repo=demosdemon/CheckBuyvm"}, os.Stdout)
+		assert.NoError(t, err)
 		commit := state.GetBranchHead(ctx, "master")
 		assert.EqualValues(t, "251502fe2ce94571548baf1710cde2beca037d57", commit)
 	})
 	t.Run("invalid repo", func(t *testing.T) {
-		state := app.State{Owner: "demosdemon", Repo: "thisrepodoesnotexist"}
+		state, err := app.NewState(ctx, []string{"-list", "-repo=demosdemon/thisrepodoesnotexist"}, os.Stdout)
+		assert.NoError(t, err)
 		assert.Panics(t, func() {
 			_ = state.GetBranchHead(ctx, "master")
 			panic(assert.AnError) // TODO: fix test
