@@ -7,8 +7,16 @@ import (
 )
 
 func TestMain(t *testing.T) {
-	t.Run("-list", func(t *testing.T) {
-		args = []string{"-list", "python"}
+	t.Run("no args", func(t *testing.T) {
+		args = []string{}
+		assert.Panics(t, main)
+	})
+	t.Run("-list with templates", func(t *testing.T) {
+		args = []string{"-debug", "-list", "python", "go"}
+		assert.NotPanics(t, main)
+	})
+	t.Run("-list with no templates", func(t *testing.T) {
+		args = []string{"-list", "-debug"}
 		assert.NotPanics(t, main)
 	})
 }
