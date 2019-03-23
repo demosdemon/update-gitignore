@@ -7,6 +7,8 @@ require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/golang/protobuf v1.3.1 // indirect
 	github.com/google/go-github/v24 v24.0.1
+	github.com/gosuri/uitable v0.0.0-20160404203958-36ee7e946282
+	github.com/mattn/go-runewidth v0.0.4 // indirect
 	github.com/onsi/ginkgo v1.8.0 // indirect
 	github.com/onsi/gomega v1.5.0 // indirect
 	github.com/spaolacci/murmur3 v1.1.0 // indirect

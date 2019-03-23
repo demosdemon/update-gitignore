@@ -8,7 +8,7 @@ import (
 
 func TestMain(t *testing.T) {
 	t.Run("-list", func(t *testing.T) {
-		args = []string{"-debug", "-list"}
+		args = []string{"-list", "python"}
 		assert.NotPanics(t, main)
 	})
 }
