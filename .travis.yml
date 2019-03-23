@@ -40,15 +40,17 @@ install:
 
 script:
   - golangci-lint run
-  - go test -v -covermode=count -coverprofile=coverage.out ./...
-  - make build
+  - make test
   - ls -lh update-gitignore
 
 after_success:
   - goveralls -coverprofile=coverage.out -service=travis-ci -repotoken $COVERALLS_TOKEN
 
 after_script:
-  - aws s3 cp ./update-gitignore "s3://$ARTIFACTS_BUCKET/$TRAVIS_REPO_SLUG/$TRAVIS_BUILD_NUMBER/$TRAVIS_GO_VERSION/update-gitignore-$(go env GOOS)-$(go env GOARCH)"
+  - ARTIFACT_PREFIX="s3://$ARTIFACTS_BUCKET/$TRAVIS_REPO_SLUG/$TRAVIS_BUILD_NUMBER/$TRAVIS_GO_VERSION"
+  - ARTIFACT_SUFFIX="$(go env GOOS)-$(go env GOARCH)"
+  - aws s3 cp ./update-gitignore "$ARTIFACT_PREFIX/update-gitignore-$ARTIFACT_SUFFIX"
+  # - aws s3 cp ./trace.out "$ARTIFACT_PREFIX/trace-$ARTIFACT_SUFFIX.log"
 
 notifications:
   slack:

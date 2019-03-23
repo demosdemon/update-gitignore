@@ -23,3 +23,8 @@ update-gitignore: $(SOURCE_FILES)
 install: all
 	install -d $(DESTDIR)/usr/bin
 	cp update-gitignore $(DESTDIR)/usr/bin
+
+.PHONY: test
+test: build
+	ls -lh update-gitignore
+	go test -v -timeout 30s -covermode=count -coverprofile=coverage.out -coverpkg ./... -benchmem -bench=. ./...
