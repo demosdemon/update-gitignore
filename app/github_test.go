@@ -7,41 +7,9 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
-	"golang.org/x/oauth2"
 
 	"github.com/demosdemon/update-gitignore/app"
 )
-
-func TestClient(t *testing.T) {
-	defer app.PanicOnError(app.InitLogging())
-
-	ctx := context.Background()
-	ctx, cancel := context.WithTimeout(ctx, time.Minute*30)
-	defer cancel()
-
-	token, ok := os.LookupEnv("GITHUB_TOKEN")
-	assert.True(t, ok, "Missing environment variable GITHUB_TOKEN")
-
-	t.Run("Test Client with no environment", func(t *testing.T) {
-		var state = app.State{}
-		client := state.Client()
-
-		rl, _, err := client.RateLimits(ctx)
-		assert.NoError(t, err)
-		assert.Equal(t, 60, rl.Core.Limit)
-	})
-
-	t.Run("Test Client with environment token", func(t *testing.T) {
-		state := app.State{}
-		state.SetToken(&oauth2.Token{AccessToken: token})
-
-		client := state.Client()
-
-		rl, _, err := client.RateLimits(ctx)
-		assert.NoError(t, err)
-		assert.Truef(t, rl.Core.Limit >= 5000, "rl.Core.Limit < 5000: %d", rl.Core.Limit)
-	})
-}
 
 func TestTree(t *testing.T) {
 	defer app.PanicOnError(app.InitLogging())

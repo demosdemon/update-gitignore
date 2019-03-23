@@ -4,11 +4,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"os"
 	"strings"
 	"testing"
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	"golang.org/x/oauth2"
 
 	"github.com/demosdemon/update-gitignore/app"
 )
@@ -127,14 +129,9 @@ func TestNewStateWithDumpAndNoArguments(t *testing.T) {
 
 func TestPrintDebug(t *testing.T) {
 	state := app.State{
-		Debug:     false,
-		Dump:      false,
-		List:      false,
-		Templates: []string{},
-		Owner:     "github",
-		Repo:      "gitignore",
-		Context:   ctx,
-		Cancel:    nil,
+		Owner:   "github",
+		Repo:    "gitignore",
+		Context: ctx,
 	}
 
 	var w strings.Builder
@@ -195,6 +192,57 @@ func TestPrintDebugFaultyPrinter(t *testing.T) {
 	err = state.PrintDebug(print)
 	assert.EqualError(t, err, "error 2")
 	assert.Equal(t, "===> State\n", w.String())
+}
+
+func TestSetTokenPanicsAfterClientCreation(t *testing.T) {
+	state := app.State{Context: ctx}
+	client := state.Client()
+	assert.NotNil(t, client)
+
+	assert.PanicsWithValue(
+		t,
+		"a client has already been created with the previous token",
+		func() {
+			state.SetToken(new(oauth2.Token))
+		},
+	)
+}
+
+func TestSetToken(t *testing.T) {
+	state := app.State{Context: ctx}
+	assert.NotPanics(t, func() { state.SetToken(nil) })
+	assert.NotPanics(t, func() { state.SetToken(&oauth2.Token{}) })
+	assert.NotPanics(t, func() { state.SetToken(nil) })
+}
+
+func TestClientWithNoEnvironment(t *testing.T) {
+	state := app.State{Context: ctx}
+	client := state.Client()
+	assert.NotNil(t, client)
+
+	rl, _, err := client.RateLimits(ctx)
+	assert.NoError(t, err)
+	assert.Equal(t, 60, rl.Core.Limit)
+}
+
+func TestClientWithEnvironmentToken(t *testing.T) {
+	token, ok := os.LookupEnv("GITHUB_TOKEN")
+	assert.True(t, ok, "Missing environment variable GITHUB_TOKEN")
+
+	state := app.State{Context: ctx}
+	state.SetToken(&oauth2.Token{AccessToken: token})
+
+	tok, err := state.Token()
+	assert.NotNil(t, tok)
+	assert.NoError(t, err)
+	assert.Equal(t, token, tok.AccessToken)
+
+	client := state.Client()
+	assert.NotNil(t, client)
+
+	rl, _, err := client.RateLimits(ctx)
+	assert.NoError(t, err)
+	assert.Truef(t, rl.Core.Limit >= 5000, "Rate Limit < 5000: %d", rl.Core.Limit)
 }
 
 func usageLine(flag, help string) string {

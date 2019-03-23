@@ -159,7 +159,7 @@ func (s *State) SetToken(token *oauth2.Token) {
 	defer s.mu.Unlock()
 
 	if s.client != nil {
-		panic("a client has already been created with the previous key")
+		panic("a client has already been created with the previous token")
 	}
 
 	s.token = token
@@ -168,11 +168,6 @@ func (s *State) SetToken(token *oauth2.Token) {
 func (s *State) Token() (*oauth2.Token, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-
-	if s.token == nil {
-		return nil, errors.New("no token")
-	}
-
 	return s.token, nil
 }
 
