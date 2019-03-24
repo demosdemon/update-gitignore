@@ -251,7 +251,19 @@ func newLogger(out io.Writer) (*gomol.Base, error) {
 
 func usage(flagset *flag.FlagSet) func() {
 	return func() {
-		fmt.Fprintf(flagset.Output(), "Usage: %s [flags] <dump | list> [template...]\n", flagset.Name())
+		fmt.Fprintln(flagset.Output(), `usage: update-gitignore [{flags}] {action} [{template}...]
+Actions:
+  dump - dumps the selected template(s) to STDOUT
+  list - lists the available templates, optionally filtered by the provided arguments
+
+{flags}    - Command line flags (see below)
+{template} - The Template to dump (required for "dump") or a search string to filter (optional for "list")
+
+Examples:
+  update-gitignore list go
+  update-gitignore -debug dump Go > .gitignore
+
+Flags:`)
 		flagset.PrintDefaults()
 	}
 }

@@ -1,4 +1,5 @@
-SOURCE_FILES := $(shell find . -type f -not -path './vendor/*' -iname '*.go')
+SOURCE_FILES = $(shell find . -type f -not -path './vendor/*' -iname '*.go' -not -iname '*_test.go')
+TEST_FILES = $(shell find . -type f -not -path './vendor/*' -iname '*_test.go')
 
 LDFLAGS = -s -w -extldflags "-static"
 
@@ -14,7 +15,7 @@ debug:
 
 .PHONY: format
 format:
-	goreturns -b -i -w $(SOURCE_FILES)
+	goreturns -b -i -w $(SOURCE_FILES) $(TEST_FILES)
 
 update-gitignore: $(SOURCE_FILES)
 	go build -a -ldflags '$(LDFLAGS)'

@@ -19,7 +19,20 @@ var (
 	ctx = context.Background()
 
 	usage = chain(
-		"Usage: app.test [flags] <dump | list> [template...]\n",
+		"usage: update-gitignore [{flags}] {action} [{template}...]\n",
+		"Actions:\n",
+		"  dump - dumps the selected template(s) to STDOUT\n",
+		"  list - lists the available templates, optionally filtered by the provided arguments\n",
+		"\n",
+		"{flags}    - Command line flags (see below)\n",
+		"{template} - The Template to dump (required for \"dump\") ",
+		"or a search string to filter (optional for \"list\")\n",
+		"\n",
+		"Examples:\n",
+		"  update-gitignore list go\n",
+		"  update-gitignore -debug dump Go > .gitignore\n",
+		"\n",
+		"Flags:\n",
 		usageLine("-debug", "print debug statements to STDERR"),
 		usageLine("-repo string", "the template repository to use (default \"github/gitignore\")"),
 		usageLine("-timeout duration", "the max duration for network requests, set to 0 for no timeout (default 30s)"),
