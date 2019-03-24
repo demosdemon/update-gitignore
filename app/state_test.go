@@ -38,6 +38,14 @@ type newStateTestCase struct {
 
 var tests = []newStateTestCase{
 	{
+		[]string{"--help"},
+		false,
+		0,
+		"flag: help requested",
+		"",
+		usage,
+	},
+	{
 		[]string{"--not-a-valid-flag", "list"},
 		false,
 		0,
