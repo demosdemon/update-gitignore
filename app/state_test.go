@@ -17,122 +17,119 @@ import (
 
 var (
 	ctx = context.Background()
-
-	usage = chain(
-		"Usage of update-gitignore:\n",
-		usageLine(
-			"-debug",
-			"print debug statements to STDERR",
-		),
-		usageLine(
-			"-dump",
-			"dump the specified templates to STDOUT",
-		),
-		usageLine(
-			"-list",
-			"list the available templates; if any, provided arguments are used to filter the results",
-		),
-		usageLine(
-			"-repo string",
-			"the template repository to use (default \"github/gitignore\")",
-		),
-		usageLine(
-			"-timeout duration",
-			"the max runtime duration, set to 0 for no timeout (default 30s)",
-		),
-	)
 )
 
-func TestNewStateInvalidArguments(t *testing.T) {
-	w := strings.Builder{}
-	state, err := app.NewState(context.Background(), []string{"--not-a-valid-flag"}, &w)
-	assert.Nil(t, state)
-	msg := "flag provided but not defined: -not-a-valid-flag"
-	assert.EqualError(t, err, msg)
-	assert.EqualValues(t, msg+"\n"+usage, w.String())
+type newStateTestCase struct {
+	args []string
+
+	valid     bool
+	timeout   time.Duration
+	errString string
+	stdout    string
+	stderr    string
 }
 
-func TestNewStateInvalidRepo(t *testing.T) {
-	w := strings.Builder{}
-	state, err := app.NewState(ctx, []string{"-list", "-repo=invalid"}, &w)
-	assert.Nil(t, state)
-	assert.EqualError(t, err, "invalid repo")
-	assert.Equal(t, "", w.String())
+var tests = []newStateTestCase{
+	{
+		[]string{"--not-a-valid-flag", "list"},
+		false,
+		0,
+		"flag provided but not defined: -not-a-valid-flag",
+		"",
+		"",
+	},
+	{
+		[]string{"-repo=invalid", "list"},
+		false,
+		0,
+		"invalid repo",
+		"",
+		"",
+	},
+	{
+		[]string{"-timeout", "-30s", "list"},
+		false,
+		0,
+		"invalid timeout",
+		"",
+		"",
+	},
+	{
+		[]string{"list"},
+		true,
+		30 * time.Second,
+		"",
+		"",
+		"",
+	},
+	{
+		[]string{"-timeout", "0", "list"},
+		true,
+		0,
+		"",
+		"",
+		"",
+	},
+	{
+		[]string{"-timeout", "60m", "list"},
+		true,
+		time.Hour,
+		"",
+		"",
+		"",
+	},
+	{
+		[]string{},
+		false,
+		0,
+		"an action, one of dump or list, is required",
+		"",
+		"",
+	},
+	{
+		[]string{"dump"},
+		true,
+		30 * time.Second,
+		"",
+		"",
+		"",
+	},
 }
 
-func TestNewStateInvalidTimeout(t *testing.T) {
-	w := strings.Builder{}
-	state, err := app.NewState(ctx, []string{"-list", "-timeout", "-30s"}, &w)
-	assert.Nil(t, state)
-	assert.EqualError(t, err, "invalid timeout")
-	assert.Equal(t, "", w.String())
+func newState(args ...string) (state *app.State, stdout string, stderr string, err error) {
+	fd0 := strings.NewReader("")
+	fd1 := new(strings.Builder)
+	fd2 := new(strings.Builder)
+
+	state, err = app.New(ctx, args, fd0, fd1, fd2)
+	if err != nil {
+		return state, stdout, stderr, err
+	}
+
+	stdout = fd1.String()
+	stderr = fd2.String()
+	return state, stdout, stderr, err
 }
 
-func TestNewStateNoTimeoutArg(t *testing.T) {
-	expected := time.Now().Add(30 * time.Second)
-	w := strings.Builder{}
-	state, err := app.NewState(ctx, []string{"-list"}, &w)
-	assert.NotNil(t, state)
-	assert.NoError(t, err)
-	assert.Equal(t, "", w.String())
-	deadline, ok := state.Context.Deadline()
-	assert.True(t, ok)
-	assert.WithinDuration(t, expected, deadline, time.Millisecond)
-}
+func TestNewState(t *testing.T) {
+	for _, c := range tests {
+		state, stdout, stderr, err := newState(c.args...)
+		if c.valid {
+			assert.NotNilf(t, state, "%#v", c)
+			assert.NoErrorf(t, err, "%#v", c)
+			assert.Equalf(t, c.timeout, state.Timeout(), "%#v", c)
+		} else {
+			assert.Nilf(t, state, "%#v", c)
+			assert.EqualErrorf(t, err, c.errString, "%#v", c)
+		}
 
-func TestNewStateNoTimeout(t *testing.T) {
-	w := strings.Builder{}
-	state, err := app.NewState(ctx, []string{"-list", "-timeout=0"}, &w)
-	assert.NotNil(t, state)
-	assert.NoError(t, err)
-	assert.Equal(t, "", w.String())
-	_, ok := state.Context.Deadline()
-	assert.False(t, ok)
-	assert.Contains(t, fmt.Sprintf("%v", state.Context), "context.Background.WithCancel")
-}
-
-func TestNewStateHighTimeout(t *testing.T) {
-	expected := time.Now().Add(time.Hour)
-	w := strings.Builder{}
-	state, err := app.NewState(ctx, []string{"-list", "-timeout", "60m"}, &w)
-	assert.NotNil(t, state)
-	assert.NoError(t, err)
-	assert.Equal(t, "", w.String())
-	deadline, ok := state.Context.Deadline()
-	assert.True(t, ok)
-	assert.WithinDuration(t, expected, deadline, time.Millisecond)
-}
-
-func TestNewStateNoArguments(t *testing.T) {
-	w := strings.Builder{}
-	state, err := app.NewState(ctx, []string{}, &w)
-	assert.NotNil(t, state)
-	assert.EqualError(t, err, "one of -list or -dump is required")
-	assert.Equal(t, "", w.String())
-}
-
-func TestNewStateWithBothListAndDump(t *testing.T) {
-	w := strings.Builder{}
-	state, err := app.NewState(ctx, []string{"-list", "-dump", "go"}, &w)
-	assert.NotNil(t, state)
-	assert.EqualError(t, err, "-list and -dump are mutually exclusive")
-	assert.Equal(t, "", w.String())
-}
-
-func TestNewStateWithDumpAndNoArguments(t *testing.T) {
-	w := strings.Builder{}
-	state, err := app.NewState(ctx, []string{"-dump"}, &w)
-	assert.NotNil(t, state)
-	assert.EqualError(t, err, "-dump requires at least one argument")
-	assert.Equal(t, "", w.String())
+		assert.Equalf(t, c.stdout, stdout, "%#v", c)
+		assert.Equalf(t, c.stderr, stderr, "%#v", c)
+	}
 }
 
 func TestPrintDebug(t *testing.T) {
-	state := app.State{
-		Owner:   "github",
-		Repo:    "gitignore",
-		Context: ctx,
-	}
+	state, _, _, _ := newState("-repo", "demosdemon/thisdoesnotexist", "list", "go", "python")
 
 	var w strings.Builder
 	print := func(v ...interface{}) error {
@@ -146,29 +143,20 @@ func TestPrintDebug(t *testing.T) {
 		t,
 		chain(
 			"===> State\n",
-			"Debug    \tfalse             \n",
-			"Dump     \tfalse             \n",
-			"List     \tfalse             \n",
-			"Templates\t                  \n",
-			"Owner    \tgithub            \n",
-			"Repo     \tgitignore         \n",
+			"Owner    \tdemosdemon        \n",
+			"Repo     \tthisdoesnotexist  \n",
 			"Context  \tcontext.Background\n",
+			"Timeout  \t30s               \n",
+			"Action   \tlist              \n",
+			"Arguments\tgo python         \n",
+			"Client   \t<nil>             \n",
 		),
 		w.String(),
 	)
 }
 
 func TestPrintDebugFaultyPrinter(t *testing.T) {
-	state := app.State{
-		Debug:     true,
-		Dump:      true,
-		List:      true,
-		Templates: []string{"go"},
-		Owner:     "github",
-		Repo:      "gitignore",
-		Context:   ctx,
-		Cancel:    nil,
-	}
+	state, _, _, _ := newState("list")
 
 	var w strings.Builder
 	print := func(...interface{}) error {
@@ -195,7 +183,7 @@ func TestPrintDebugFaultyPrinter(t *testing.T) {
 }
 
 func TestSetTokenPanicsAfterClientCreation(t *testing.T) {
-	state := app.State{Context: ctx}
+	state, _, _, _ := newState("list")
 	client := state.Client()
 	assert.NotNil(t, client)
 
@@ -209,14 +197,16 @@ func TestSetTokenPanicsAfterClientCreation(t *testing.T) {
 }
 
 func TestSetToken(t *testing.T) {
-	state := app.State{Context: ctx}
+	state, _, _, _ := newState("list")
 	assert.NotPanics(t, func() { state.SetToken(nil) })
 	assert.NotPanics(t, func() { state.SetToken(&oauth2.Token{}) })
 	assert.NotPanics(t, func() { state.SetToken(nil) })
 }
 
 func TestClientWithNoEnvironment(t *testing.T) {
-	state := app.State{Context: ctx}
+	state, _, _, _ := newState("list")
+	state.SetToken(nil)
+
 	client := state.Client()
 	assert.NotNil(t, client)
 
@@ -229,7 +219,7 @@ func TestClientWithEnvironmentToken(t *testing.T) {
 	token, ok := os.LookupEnv("GITHUB_TOKEN")
 	assert.True(t, ok, "Missing environment variable GITHUB_TOKEN")
 
-	state := app.State{Context: ctx}
+	state, _, _, _ := newState("list")
 	state.SetToken(&oauth2.Token{AccessToken: token})
 
 	tok, err := state.Token()
@@ -243,10 +233,6 @@ func TestClientWithEnvironmentToken(t *testing.T) {
 	rl, _, err := client.RateLimits(ctx)
 	assert.NoError(t, err)
 	assert.Truef(t, rl.Core.Limit >= 5000, "Rate Limit < 5000: %d", rl.Core.Limit)
-}
-
-func usageLine(flag, help string) string {
-	return fmt.Sprintf("  %s\n    \t%s\n", flag, help)
 }
 
 func chain(v ...string) string {
