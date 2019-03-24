@@ -113,7 +113,7 @@ func newState(args ...string) (state *app.State, stdout string, stderr string, e
 
 func TestNewState(t *testing.T) {
 	for _, c := range tests {
-		state, stdout, stderr, err := newState(c.args...)
+		state, stdout, stderr, err := newState(append([]string{"-debug"}, c.args...)...)
 		if c.valid {
 			assert.NotNilf(t, state, "%#v", c)
 			assert.NoErrorf(t, err, "%#v", c)
