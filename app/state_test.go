@@ -17,6 +17,13 @@ import (
 
 var (
 	ctx = context.Background()
+
+	usage = chain(
+		"Usage: app.test [flags] <dump | list> [template...]\n",
+		usageLine("-debug", "print debug statements to STDERR"),
+		usageLine("-repo string", "the template repository to use (default \"github/gitignore\")"),
+		usageLine("-timeout duration", "the max duration for network requests, set to 0 for no timeout (default 30s)"),
+	)
 )
 
 type newStateTestCase struct {
@@ -36,7 +43,7 @@ var tests = []newStateTestCase{
 		0,
 		"flag provided but not defined: -not-a-valid-flag",
 		"",
-		"",
+		"flag provided but not defined: -not-a-valid-flag\n" + usage,
 	},
 	{
 		[]string{"-repo=invalid", "list"},
@@ -96,18 +103,18 @@ var tests = []newStateTestCase{
 	},
 }
 
-func newState(args ...string) (state *app.State, stdout string, stderr string, err error) {
+func newState(args ...string) (*app.State, string, string, error) {
 	fd0 := strings.NewReader("")
-	fd1 := new(strings.Builder)
-	fd2 := new(strings.Builder)
+	fd1 := strings.Builder{}
+	fd2 := strings.Builder{}
 
-	state, err = app.New(ctx, args, fd0, fd1, fd2)
+	state, err := app.New(ctx, args, fd0, &fd1, &fd2)
+	stdout := fd1.String()
+	stderr := fd2.String()
 	if err != nil {
-		return state, stdout, stderr, err
+		return nil, stdout, stderr, err
 	}
 
-	stdout = fd1.String()
-	stderr = fd2.String()
 	return state, stdout, stderr, err
 }
 
@@ -241,4 +248,8 @@ func chain(v ...string) string {
 		w.WriteString(s)
 	}
 	return w.String()
+}
+
+func usageLine(flag, help string) string {
+	return fmt.Sprintf("  %s\n    \t%s\n", flag, help)
 }

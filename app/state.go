@@ -187,7 +187,9 @@ func (s *State) Client() *github.Client {
 func (s *State) Logger() (*gomol.Base, error) {
 	if !s.logger.IsInitialized() {
 		// err may not be nil if we add more loggers
-		_ = s.logger.InitLoggers()
+		if err := s.logger.InitLoggers(); err != nil {
+			return nil, err
+		}
 	}
 	return s.logger, nil
 }
