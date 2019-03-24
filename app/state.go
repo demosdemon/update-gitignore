@@ -67,10 +67,7 @@ func New(
 	arguments []string,
 	stdin io.Reader,
 	stdout, stderr io.Writer,
-) (
-	state *State,
-	err error,
-) {
+) (*State, error) {
 	fs := flag.NewFlagSet(path.Base(os.Args[0]), flag.ContinueOnError)
 	fs.SetOutput(stderr)
 	fs.Usage = usage(fs)
@@ -79,19 +76,17 @@ func New(
 	repo := fs.String("repo", "github/gitignore", "the template repository to use")
 	timeout := fs.Duration("timeout", time.Second*30, "the max duration for network requests, set to 0 for no timeout")
 
-	if err = fs.Parse(arguments); err != nil {
-		return state, err
+	if err := fs.Parse(arguments); err != nil {
+		return nil, err
 	}
 
 	slice := strings.SplitN(*repo, "/", 2)
 	if len(slice) < 2 {
-		err = ErrInvalidRepo
-		return state, err
+		return nil, ErrInvalidRepo
 	}
 
 	if *timeout < 0 {
-		err = ErrInvalidTimeout
-		return state, err
+		return nil, ErrInvalidTimeout
 	}
 
 	var token *oauth2.Token
@@ -113,7 +108,7 @@ func New(
 		logger.SetLogLevel(gomol.LevelInfo)
 	}
 
-	state = &State{
+	state := &State{
 		Owner: slice[0],
 		Repo:  slice[1],
 
