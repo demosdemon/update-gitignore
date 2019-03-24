@@ -34,6 +34,7 @@ type newStateTestCase struct {
 	errString string
 	stdout    string
 	stderr    string
+	command   string
 }
 
 var tests = []newStateTestCase{
@@ -44,6 +45,7 @@ var tests = []newStateTestCase{
 		"flag: help requested",
 		"",
 		usage,
+		"",
 	},
 	{
 		[]string{"--not-a-valid-flag", "list"},
@@ -52,6 +54,7 @@ var tests = []newStateTestCase{
 		"flag provided but not defined: -not-a-valid-flag",
 		"",
 		"flag provided but not defined: -not-a-valid-flag\n" + usage,
+		"list",
 	},
 	{
 		[]string{"-repo=invalid", "list"},
@@ -60,6 +63,7 @@ var tests = []newStateTestCase{
 		"invalid repo",
 		"",
 		"",
+		"list",
 	},
 	{
 		[]string{"-timeout", "-30s", "list"},
@@ -68,6 +72,7 @@ var tests = []newStateTestCase{
 		"invalid timeout",
 		"",
 		"",
+		"list",
 	},
 	{
 		[]string{"list"},
@@ -76,6 +81,7 @@ var tests = []newStateTestCase{
 		"",
 		"",
 		"",
+		"list",
 	},
 	{
 		[]string{"-timeout", "0", "list"},
@@ -84,6 +90,7 @@ var tests = []newStateTestCase{
 		"",
 		"",
 		"",
+		"list",
 	},
 	{
 		[]string{"-timeout", "60m", "list"},
@@ -92,12 +99,14 @@ var tests = []newStateTestCase{
 		"",
 		"",
 		"",
+		"list",
 	},
 	{
 		[]string{},
 		false,
 		0,
 		"an action, one of dump or list, is required",
+		"",
 		"",
 		"",
 	},
@@ -108,6 +117,16 @@ var tests = []newStateTestCase{
 		"",
 		"",
 		"",
+		"dump",
+	},
+	{
+		[]string{"cat"},
+		true,
+		30 * time.Second,
+		"",
+		"",
+		"",
+		"cat",
 	},
 }
 
@@ -129,10 +148,29 @@ func newState(args ...string) (*app.State, string, string, error) {
 func TestNewState(t *testing.T) {
 	for _, c := range tests {
 		state, stdout, stderr, err := newState(append([]string{"-debug"}, c.args...)...)
+		defer func() { _ = state.ShutdownLoggers() }()
+
 		if c.valid {
 			assert.NotNilf(t, state, "%#v", c)
 			assert.NoErrorf(t, err, "%#v", c)
 			assert.Equalf(t, c.timeout, state.Timeout(), "%#v", c)
+			logger, err := state.Logger()
+			assert.NotNil(t, logger)
+			assert.NoError(t, err)
+
+			cmd, err := state.Command()
+			switch c.command {
+			case "dump":
+				fallthrough
+			case "list":
+				assert.NotNil(t, cmd)
+				assert.NoError(t, err)
+				assert.Equal(t, c.command, cmd.GetName())
+			default:
+				assert.Nil(t, cmd)
+				assert.EqualError(t, err, fmt.Sprintf("unrecognized action %s", c.command))
+			}
+
 		} else {
 			assert.Nilf(t, state, "%#v", c)
 			assert.EqualErrorf(t, err, c.errString, "%#v", c)
