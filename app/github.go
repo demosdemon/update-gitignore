@@ -39,18 +39,9 @@ func (s *State) GetBranchHead(ctx context.Context, branchName string) string {
 	}
 
 	commit := branch.Commit
-	if commit == nil {
-		panic(fmt.Errorf("got nil for branch.Commit: %#v", branch)) // TODO: return error
-	}
-
 	sha := commit.SHA
-	if sha == nil {
-		panic(fmt.Errorf("got nil for branch.Commit.SHA: %#v", branch)) // TODO: return error
-	}
-
-	rv := *sha
-	gomol.Debugf("head commit = %s", rv)
-	return rv
+	gomol.Debugf("head commit = %s", *sha)
+	return *sha
 }
 
 func (s *State) getTree(ctx context.Context, sha string) <-chan *Template {

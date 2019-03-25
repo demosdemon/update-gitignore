@@ -1,4 +1,4 @@
-package app_test
+package app
 
 import (
 	"bufio"
@@ -113,4 +113,47 @@ func TestGithubClientIndex(t *testing.T) {
 	assert.Equal(t, int64(1062897), repo.GetID())
 	assert.Equal(t, "MDEwOlJlcG9zaXRvcnkxMDYyODk3", repo.GetNodeID())
 	assert.Equal(t, "gitignore", repo.GetName())
+}
+
+func TestGithubDefaultBranch(t *testing.T) {
+	state, err := New(context.Background(), []string{"list"}, nil, nil, nil)
+	require.NoError(t, err)
+	require.NotNil(t, state)
+	state.client = githubClient
+
+	defaultBranch := state.GetDefaultBranch(context.Background())
+	assert.Equal(t, "master", defaultBranch)
+
+	state.Repo = "anything"
+	defaultBranch = state.GetDefaultBranch(context.Background())
+	assert.Zero(t, defaultBranch)
+}
+
+func TestGithubBranchHead(t *testing.T) {
+	state, err := New(context.Background(), []string{"list"}, nil, nil, nil)
+	require.NoError(t, err)
+	require.NotNil(t, state)
+	state.client = githubClient
+
+	commit := state.GetBranchHead(context.Background(), "master")
+	assert.Equal(t, "56e3f5a7b2a67413a1d3e33fceb8100898015a2e", commit)
+
+	commit = state.GetBranchHead(context.Background(), "anything")
+	assert.Zero(t, commit)
+}
+
+func TestGithubTree(t *testing.T) {
+	state, err := New(context.Background(), []string{"list"}, nil, nil, nil)
+	require.NoError(t, err)
+	require.NotNil(t, state)
+	state.client = githubClient
+
+	ch := state.Tree(context.Background())
+
+	res := make([]*Template, 0, 223)
+	for x := range ch {
+		res = append(res, x)
+	}
+
+	assert.Len(t, res, 223)
 }
