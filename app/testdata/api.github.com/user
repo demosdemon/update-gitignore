@@ -1,0 +1,27 @@
+HTTP/1.1 200 OK
+Server: GitHub.com
+Date: Sun, 24 Mar 2019 21:21:33 GMT
+Content-Type: application/json; charset=utf-8
+Content-Length: 1343
+Status: 200 OK
+X-RateLimit-Limit: 5000
+X-RateLimit-Remaining: 4999
+X-RateLimit-Reset: 1553466093
+Cache-Control: private, max-age=60, s-maxage=60
+Vary: Accept, Authorization, Cookie, X-GitHub-OTP
+ETag: "b2f5a7c1c770b449c70f83bccb5f3495"
+Last-Modified: Wed, 06 Mar 2019 20:51:13 GMT
+X-OAuth-Scopes: 
+X-Accepted-OAuth-Scopes: 
+X-GitHub-Media-Type: github.v3; format=json
+Access-Control-Expose-Headers: ETag, Link, Location, Retry-After, X-GitHub-OTP, X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset, X-OAuth-Scopes, X-Accepted-OAuth-Scopes, X-Poll-Interval, X-GitHub-Media-Type
+Access-Control-Allow-Origin: *
+Strict-Transport-Security: max-age=31536000; includeSubdomains; preload
+X-Frame-Options: deny
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 1; mode=block
+Referrer-Policy: origin-when-cross-origin, strict-origin-when-cross-origin
+Content-Security-Policy: default-src 'none'
+X-GitHub-Request-Id: E7D7:24FD:CD092B:203716C:5C97F4DD
+
+{"login":"demosdemon","id":310610,"node_id":"MDQ6VXNlcjMxMDYxMA==","avatar_url":"https://avatars0.githubusercontent.com/u/310610?v=4","gravatar_id":"","url":"https://api.github.com/users/demosdemon","html_url":"https://github.com/demosdemon","followers_url":"https://api.github.com/users/demosdemon/followers","following_url":"https://api.github.com/users/demosdemon/following{/other_user}","gists_url":"https://api.github.com/users/demosdemon/gists{/gist_id}","starred_url":"https://api.github.com/users/demosdemon/starred{/owner}{/repo}","subscriptions_url":"https://api.github.com/users/demosdemon/subscriptions","organizations_url":"https://api.github.com/users/demosdemon/orgs","repos_url":"https://api.github.com/users/demosdemon/repos","events_url":"https://api.github.com/users/demosdemon/events{/privacy}","received_events_url":"https://api.github.com/users/demosdemon/received_events","type":"User","site_admin":false,"name":"Joachim Brandon LeBlanc","company":"@platformsh ","blog":"https://leblanc.codes","location":"Lafayette, LA","email":"brandon@leblanc.codes","hireable":null,"bio":"Cloud Operations Engineer at @platformsh; python lover; open source fan; very opinionated about whitespace","public_repos":79,"public_gists":6,"followers":9,"following":13,"created_at":"2010-06-21T10:51:35Z","updated_at":"2019-03-06T20:51:13Z"}

@@ -32,8 +32,8 @@ before_install:
   - aws --version
   - curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sh -s -- -b "$(go env GOPATH)/bin" v1.15.0
   - golangci-lint --version
-  - go get -u golang.org/x/tools/cmd/cover
-  - go get -u github.com/mattn/goveralls
+  - go install golang.org/x/tools/cmd/cover
+  - go install github.com/mattn/goveralls
 
 install:
   - go mod vendor

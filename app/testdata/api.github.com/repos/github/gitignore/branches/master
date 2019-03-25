@@ -1,0 +1,26 @@
+HTTP/1.1 200 OK
+Server: GitHub.com
+Date: Sun, 24 Mar 2019 21:26:58 GMT
+Content-Type: application/json; charset=utf-8
+Content-Length: 3968
+Status: 200 OK
+X-RateLimit-Limit: 5000
+X-RateLimit-Remaining: 4998
+X-RateLimit-Reset: 1553466367
+Cache-Control: private, max-age=60, s-maxage=60
+Vary: Accept, Authorization, Cookie, X-GitHub-OTP
+ETag: "e78f83f36a6047e386b0ddc2f5c0964f"
+X-OAuth-Scopes: 
+X-Accepted-OAuth-Scopes: 
+X-GitHub-Media-Type: github.v3; format=json
+Access-Control-Expose-Headers: ETag, Link, Location, Retry-After, X-GitHub-OTP, X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset, X-OAuth-Scopes, X-Accepted-OAuth-Scopes, X-Poll-Interval, X-GitHub-Media-Type
+Access-Control-Allow-Origin: *
+Strict-Transport-Security: max-age=31536000; includeSubdomains; preload
+X-Frame-Options: deny
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 1; mode=block
+Referrer-Policy: origin-when-cross-origin, strict-origin-when-cross-origin
+Content-Security-Policy: default-src 'none'
+X-GitHub-Request-Id: E7F0:5725:1B068A6:366FAC1:5C97F622
+
+{"name":"master","commit":{"sha":"56e3f5a7b2a67413a1d3e33fceb8100898015a2e","node_id":"MDY6Q29tbWl0MTA2Mjg5Nzo1NmUzZjVhN2IyYTY3NDEzYTFkM2UzM2ZjZWI4MTAwODk4MDE1YTJl","commit":{"author":{"name":"Lucas Steer","email":"LucasSteer@users.noreply.github.com","date":"2019-03-23T18:29:17Z"},"committer":{"name":"Brendan Forster","email":"brendan@github.com","date":"2019-03-23T18:29:17Z"},"message":"[Unity] Added leading slashes to ignored directories so that valid subdirectories aren't ignored incorrectly (#2980)\n\n* Added leading slashes to ignored directories so that valid subdirectories aren't ignored incorrectly\r\n\r\n* Added comment to recommend .gitignore placement; added leading slash for AssetStoreTools rule\r\n\r\n* Added a leading slash to never ignore .meta files in the root Asset folder","tree":{"sha":"ac6dc88017c8afae33d7eb6b1a8cca53846caeaf","url":"https://api.github.com/repos/github/gitignore/git/trees/ac6dc88017c8afae33d7eb6b1a8cca53846caeaf"},"url":"https://api.github.com/repos/github/gitignore/git/commits/56e3f5a7b2a67413a1d3e33fceb8100898015a2e","comment_count":0,"verification":{"verified":false,"reason":"unsigned","signature":null,"payload":null}},"url":"https://api.github.com/repos/github/gitignore/commits/56e3f5a7b2a67413a1d3e33fceb8100898015a2e","html_url":"https://github.com/github/gitignore/commit/56e3f5a7b2a67413a1d3e33fceb8100898015a2e","comments_url":"https://api.github.com/repos/github/gitignore/commits/56e3f5a7b2a67413a1d3e33fceb8100898015a2e/comments","author":{"login":"LucasSteer","id":16173046,"node_id":"MDQ6VXNlcjE2MTczMDQ2","avatar_url":"https://avatars2.githubusercontent.com/u/16173046?v=4","gravatar_id":"","url":"https://api.github.com/users/LucasSteer","html_url":"https://github.com/LucasSteer","followers_url":"https://api.github.com/users/LucasSteer/followers","following_url":"https://api.github.com/users/LucasSteer/following{/other_user}","gists_url":"https://api.github.com/users/LucasSteer/gists{/gist_id}","starred_url":"https://api.github.com/users/LucasSteer/starred{/owner}{/repo}","subscriptions_url":"https://api.github.com/users/LucasSteer/subscriptions","organizations_url":"https://api.github.com/users/LucasSteer/orgs","repos_url":"https://api.github.com/users/LucasSteer/repos","events_url":"https://api.github.com/users/LucasSteer/events{/privacy}","received_events_url":"https://api.github.com/users/LucasSteer/received_events","type":"User","site_admin":false},"committer":{"login":"shiftkey","id":359239,"node_id":"MDQ6VXNlcjM1OTIzOQ==","avatar_url":"https://avatars2.githubusercontent.com/u/359239?v=4","gravatar_id":"","url":"https://api.github.com/users/shiftkey","html_url":"https://github.com/shiftkey","followers_url":"https://api.github.com/users/shiftkey/followers","following_url":"https://api.github.com/users/shiftkey/following{/other_user}","gists_url":"https://api.github.com/users/shiftkey/gists{/gist_id}","starred_url":"https://api.github.com/users/shiftkey/starred{/owner}{/repo}","subscriptions_url":"https://api.github.com/users/shiftkey/subscriptions","organizations_url":"https://api.github.com/users/shiftkey/orgs","repos_url":"https://api.github.com/users/shiftkey/repos","events_url":"https://api.github.com/users/shiftkey/events{/privacy}","received_events_url":"https://api.github.com/users/shiftkey/received_events","type":"User","site_admin":true},"parents":[{"sha":"6d467f5ebe94f260e5043767f88216d13bafca62","url":"https://api.github.com/repos/github/gitignore/commits/6d467f5ebe94f260e5043767f88216d13bafca62","html_url":"https://github.com/github/gitignore/commit/6d467f5ebe94f260e5043767f88216d13bafca62"}]},"_links":{"self":"https://api.github.com/repos/github/gitignore/branches/master","html":"https://github.com/github/gitignore/tree/master"},"protected":false,"protection":{"enabled":false,"required_status_checks":{"enforcement_level":"off","contexts":[]}},"protection_url":"https://api.github.com/repos/github/gitignore/branches/master/protection"}
