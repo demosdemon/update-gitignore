@@ -482,7 +482,7 @@ func TestClient_GetTree(t *testing.T) {
 
 			tree, err := c.GetTree(tt.sha)
 			assert.True(t, equals(tt.fields, tree))
-			assert.EqualValues(t, tt.err, err)
+			assert.Equal(t, tt.err, err)
 		})
 	}
 }

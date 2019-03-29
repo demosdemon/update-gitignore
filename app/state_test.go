@@ -170,7 +170,7 @@ func TestState_ParseArguments(t *testing.T) {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			err := tt.state.ParseArguments()
-			assert.EqualValues(t, tt.expected.err, err)
+			assert.Equal(t, tt.expected.err, err)
 			assert.Equal(t, tt.expected.stdout, readBuffer(tt.state.Stdout))
 			assert.Equal(t, tt.expected.stderr, readBuffer(tt.state.Stderr))
 			assert.Equal(t, tt.expected.debug, tt.state.Debug())
@@ -211,14 +211,14 @@ func TestState_Command(t *testing.T) {
 			assert.NoError(t, err)
 
 			cmd, err := tt.state.Command()
-			assert.EqualValues(t, tt.err, err)
+			assert.Equal(t, tt.err, err)
 
 			if cmd != nil {
 				name := cmd.GetName()
 				assert.Equal(t, tt.name, name)
 
 				rv := cmd.Run()
-				assert.EqualValues(t, 0, rv)
+				assert.Equal(t, app.ExitStatus(0), rv)
 			}
 		})
 	}
