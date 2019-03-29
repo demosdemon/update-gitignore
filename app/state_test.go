@@ -2,7 +2,6 @@ package app_test
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -51,7 +50,7 @@ func usageLine(flag, help string) string {
 
 func TestState_ParseArguments(t *testing.T) {
 	type expected struct {
-		err     error
+		err     *string
 		stdout  string
 		stderr  string
 		debug   bool
@@ -80,7 +79,7 @@ func TestState_ParseArguments(t *testing.T) {
 			"no arguments",
 			&app.State{App: newApp(nil)},
 			expected{
-				app.ErrActionRequired,
+				strptr("need an action"),
 				"",
 				usage,
 				false,
@@ -92,7 +91,7 @@ func TestState_ParseArguments(t *testing.T) {
 			"invalid flag",
 			&app.State{App: newApp(nil, "--not-for-you")},
 			expected{
-				errors.New("flag provided but not defined: -not-for-you"),
+				strptr("flag provided but not defined: -not-for-you"),
 				"",
 				chain(
 					"flag provided but not defined: -not-for-you\n",
@@ -170,7 +169,7 @@ func TestState_ParseArguments(t *testing.T) {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			err := tt.state.ParseArguments()
-			assert.Equal(t, tt.expected.err, err)
+			errEquals(t, tt.expected.err, err)
 			assert.Equal(t, tt.expected.stdout, readBuffer(tt.state.Stdout))
 			assert.Equal(t, tt.expected.stderr, readBuffer(tt.state.Stderr))
 			assert.Equal(t, tt.expected.debug, tt.state.Debug())
@@ -184,7 +183,7 @@ func TestState_Command(t *testing.T) {
 	cases := []struct {
 		name  string
 		state *app.State
-		err   error
+		err   *string
 	}{
 		{
 			"dump",
@@ -199,7 +198,7 @@ func TestState_Command(t *testing.T) {
 		{
 			"invalid",
 			&app.State{App: newApp(nil, "invalid")},
-			errors.New("unrecognized action invalid"),
+			strptr("unrecognized action invalid"),
 		},
 	}
 
@@ -211,7 +210,7 @@ func TestState_Command(t *testing.T) {
 			assert.NoError(t, err)
 
 			cmd, err := tt.state.Command()
-			assert.Equal(t, tt.err, err)
+			errEquals(t, tt.err, err)
 
 			if cmd != nil {
 				name := cmd.GetName()
@@ -220,6 +219,36 @@ func TestState_Command(t *testing.T) {
 				rv := cmd.Run()
 				assert.Equal(t, app.ExitStatus(0), rv)
 			}
+		})
+	}
+}
+
+func TestState_Client(t *testing.T) {
+	cases := []struct {
+		name  string
+		state *app.State
+		err   *string
+	}{
+		{
+			"valid",
+			&app.State{App: newApp(nil, "test")},
+			nil,
+		},
+		{
+			"invalid",
+			&app.State{App: newApp(nil, "-repo", "invalid", "test")},
+			strptr("invalid repo"),
+		},
+	}
+
+	t.Parallel()
+	for _, tt := range cases {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			err := tt.state.ParseArguments()
+			assert.NoError(t, err)
+			_, err = tt.state.Client()
+			errEquals(t, tt.err, err)
 		})
 	}
 }

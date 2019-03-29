@@ -2,11 +2,9 @@ package app_test
 
 import (
 	"bufio"
-	"errors"
 	"fmt"
 	"math/rand"
 	"net/http"
-	"net/url"
 	"os"
 	"path"
 	"path/filepath"
@@ -90,8 +88,20 @@ func newClient(env []string, key string) *app.Client {
 	return c
 }
 
+func strptr(s string) *string {
+	return &s
+}
+
 func intts(ts int64) github.Timestamp {
 	return github.Timestamp{Time: time.Unix(ts, 0)}
+}
+
+func errEquals(tb testing.TB, expected *string, actual error) bool {
+	if expected == nil {
+		return assert.NoError(tb, actual)
+	}
+
+	return assert.EqualError(tb, actual, *expected)
 }
 
 func equals(expected, actual interface{}) bool {
@@ -190,13 +200,13 @@ func TestClient_Token(t *testing.T) {
 		name        string
 		environment []string
 		fields      *fields
-		err         error
+		err         *string
 	}{
 		{
 			"no environment",
 			nil,
 			nil,
-			app.ErrTokenNotFound,
+			strptr("token not found"),
 		},
 		{
 			"fake key",
@@ -208,7 +218,7 @@ func TestClient_Token(t *testing.T) {
 			"empty key",
 			[]string{"GITHUB_TOKEN="},
 			nil,
-			app.ErrTokenNotFound,
+			strptr("token not found"),
 		},
 	}
 
@@ -221,7 +231,7 @@ func TestClient_Token(t *testing.T) {
 
 			tok, err := c.Token()
 			assert.True(t, equals(tt.fields, tok))
-			assert.EqualValues(t, tt.err, err)
+			errEquals(t, tt.err, err)
 		})
 	}
 }
@@ -269,7 +279,7 @@ func TestClient_GetUser(t *testing.T) {
 	cases := []struct {
 		key    string
 		fields *fields
-		err    error
+		err    *string
 	}{
 		{
 			"valid",
@@ -293,7 +303,7 @@ func TestClient_GetUser(t *testing.T) {
 
 			user, err := c.GetUser()
 			assert.True(t, equals(tt.fields, user))
-			assert.EqualValues(t, tt.err, err)
+			errEquals(t, tt.err, err)
 		})
 	}
 }
@@ -302,7 +312,7 @@ func TestClient_GetRateLimits(t *testing.T) {
 	cases := []struct {
 		key string
 		rl  *github.RateLimits
-		err error
+		err *string
 	}{
 		{
 			"valid",
@@ -331,7 +341,7 @@ func TestClient_GetRateLimits(t *testing.T) {
 
 			rl, err := c.GetRateLimits()
 			assert.EqualValues(t, tt.rl, rl)
-			assert.EqualValues(t, tt.err, err)
+			errEquals(t, tt.err, err)
 		})
 	}
 }
@@ -346,7 +356,7 @@ func TestClient_GetRepository(t *testing.T) {
 	cases := []struct {
 		key    string
 		fields *fields
-		err    error
+		err    *string
 	}{
 		{
 			"valid",
@@ -369,7 +379,7 @@ func TestClient_GetRepository(t *testing.T) {
 
 			repo, err := c.GetRepository()
 			assert.True(t, equals(tt.fields, repo))
-			assert.EqualValues(t, tt.err, err)
+			errEquals(t, tt.err, err)
 		})
 	}
 }
@@ -389,7 +399,7 @@ func TestClient_GetBranch(t *testing.T) {
 	cases := []struct {
 		key    string
 		fields *fields
-		err    error
+		err    *string
 	}{
 		{
 			"valid",
@@ -416,7 +426,7 @@ func TestClient_GetBranch(t *testing.T) {
 
 			branch, err := c.GetBranch("master")
 			assert.True(t, equals(tt.fields, branch))
-			assert.EqualValues(t, tt.err, err)
+			errEquals(t, tt.err, err)
 		})
 	}
 }
@@ -440,17 +450,13 @@ func TestClient_GetTree(t *testing.T) {
 		key    string
 		sha    string
 		fields *fields
-		err    error
+		err    *string
 	}{
 		{
 			"valid",
 			"45f58ef9211cc06f3ef86585c7ecb1b3d52fd4f9",
 			nil,
-			&url.Error{
-				Op:  "Get",
-				URL: "https://api.github.com/repos/github/gitignore/git/trees/45f58ef9211cc06f3ef86585c7ecb1b3d52fd4f9",
-				Err: errors.New("unexpected EOF"),
-			},
+			strptr("Get https://api.github.com/repos/github/gitignore/git/trees/45f58ef9211cc06f3ef86585c7ecb1b3d52fd4f9: unexpected EOF"),
 		},
 		{
 			"valid",
@@ -482,7 +488,7 @@ func TestClient_GetTree(t *testing.T) {
 
 			tree, err := c.GetTree(tt.sha)
 			assert.True(t, equals(tt.fields, tree))
-			assert.Equal(t, tt.err, err)
+			errEquals(t, tt.err, err)
 		})
 	}
 }
