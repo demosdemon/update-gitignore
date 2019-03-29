@@ -1,23 +1,21 @@
 package app_test
 
 import (
-	"context"
+	"bytes"
 	"errors"
 	"fmt"
-	"os"
+	"io"
+	"io/ioutil"
 	"strings"
 	"testing"
 	"time"
 
 	"github.com/stretchr/testify/assert"
-	"golang.org/x/oauth2"
 
 	"github.com/demosdemon/update-gitignore/app"
 )
 
 var (
-	ctx = context.Background()
-
 	usage = chain(
 		"usage: update-gitignore [{flags}] {action} [{template}...]\n",
 		"Actions:\n",
@@ -35,271 +33,9 @@ var (
 		"Flags:\n",
 		usageLine("-debug", "print debug statements to STDERR"),
 		usageLine("-repo string", "the template repository to use (default \"github/gitignore\")"),
-		usageLine("-timeout duration", "the max duration for network requests, set to 0 for no timeout (default 30s)"),
+		usageLine("-timeout duration", "the max duration for network requests (0 for no timeout) (default 30s)"),
 	)
 )
-
-type newStateTestCase struct {
-	args []string
-
-	valid     bool
-	timeout   time.Duration
-	errString string
-	stdout    string
-	stderr    string
-	command   string
-}
-
-var tests = []newStateTestCase{
-	{
-		[]string{"--help"},
-		false,
-		0,
-		"flag: help requested",
-		"",
-		usage,
-		"",
-	},
-	{
-		[]string{"--not-a-valid-flag", "list"},
-		false,
-		0,
-		"flag provided but not defined: -not-a-valid-flag",
-		"",
-		"flag provided but not defined: -not-a-valid-flag\n" + usage,
-		"list",
-	},
-	{
-		[]string{"-repo=invalid", "list"},
-		false,
-		0,
-		"invalid repo",
-		"",
-		"",
-		"list",
-	},
-	{
-		[]string{"-timeout", "-30s", "list"},
-		false,
-		0,
-		"invalid timeout",
-		"",
-		"",
-		"list",
-	},
-	{
-		[]string{"list"},
-		true,
-		30 * time.Second,
-		"",
-		"",
-		"",
-		"list",
-	},
-	{
-		[]string{"-timeout", "0", "list"},
-		true,
-		0,
-		"",
-		"",
-		"",
-		"list",
-	},
-	{
-		[]string{"-timeout", "60m", "list"},
-		true,
-		time.Hour,
-		"",
-		"",
-		"",
-		"list",
-	},
-	{
-		[]string{},
-		false,
-		0,
-		"an action, one of dump or list, is required",
-		"",
-		"",
-		"",
-	},
-	{
-		[]string{"dump"},
-		true,
-		30 * time.Second,
-		"",
-		"",
-		"",
-		"dump",
-	},
-	{
-		[]string{"cat"},
-		true,
-		30 * time.Second,
-		"",
-		"",
-		"",
-		"cat",
-	},
-}
-
-func newState(args ...string) (*app.State, string, string, error) {
-	fd0 := strings.NewReader("")
-	fd1 := strings.Builder{}
-	fd2 := strings.Builder{}
-
-	state, err := app.New(ctx, args, fd0, &fd1, &fd2)
-	stdout := fd1.String()
-	stderr := fd2.String()
-	if err != nil {
-		return nil, stdout, stderr, err
-	}
-
-	return state, stdout, stderr, err
-}
-
-func TestNewState(t *testing.T) {
-	for _, c := range tests {
-		state, stdout, stderr, err := newState(append([]string{"-debug"}, c.args...)...)
-		defer func() { _ = state.ShutdownLoggers() }()
-
-		if c.valid {
-			assert.NotNilf(t, state, "%#v", c)
-			assert.NoErrorf(t, err, "%#v", c)
-			assert.Equalf(t, c.timeout, state.Timeout(), "%#v", c)
-			logger, err := state.Logger()
-			assert.NotNil(t, logger)
-			assert.NoError(t, err)
-
-			cmd, err := state.Command()
-			switch c.command {
-			case "dump":
-				fallthrough
-			case "list":
-				assert.NotNil(t, cmd)
-				assert.NoError(t, err)
-				assert.Equal(t, c.command, cmd.GetName())
-			default:
-				assert.Nil(t, cmd)
-				assert.EqualError(t, err, fmt.Sprintf("unrecognized action %s", c.command))
-			}
-
-		} else {
-			assert.Nilf(t, state, "%#v", c)
-			assert.EqualErrorf(t, err, c.errString, "%#v", c)
-		}
-
-		assert.Equalf(t, c.stdout, stdout, "%#v", c)
-		assert.Equalf(t, c.stderr, stderr, "%#v", c)
-	}
-}
-
-func TestPrintDebug(t *testing.T) {
-	state, _, _, _ := newState("-repo", "demosdemon/thisdoesnotexist", "list", "go", "python")
-
-	var w strings.Builder
-	print := func(v ...interface{}) error {
-		_, err := fmt.Fprintln(&w, v...)
-		return err
-	}
-
-	err := state.PrintDebug(print)
-	assert.NoError(t, err)
-	assert.Equal(
-		t,
-		chain(
-			"===> State\n",
-			"Owner    \tdemosdemon        \n",
-			"Repo     \tthisdoesnotexist  \n",
-			"Context  \tcontext.Background\n",
-			"Timeout  \t30s               \n",
-			"Action   \tlist              \n",
-			"Arguments\tgo python         \n",
-			"Client   \t<nil>             \n",
-		),
-		w.String(),
-	)
-}
-
-func TestPrintDebugFaultyPrinter(t *testing.T) {
-	state, _, _, _ := newState("list")
-
-	var w strings.Builder
-	print := func(...interface{}) error {
-		return errors.New("always an error")
-	}
-
-	err := state.PrintDebug(print)
-	assert.EqualError(t, err, "always an error")
-	assert.Equal(t, "", w.String())
-
-	count := 0
-	print = func(v ...interface{}) error {
-		count++
-		if count == 1 {
-			_, err := fmt.Fprintln(&w, v...)
-			return err
-		}
-		return fmt.Errorf("error %d", count)
-	}
-
-	err = state.PrintDebug(print)
-	assert.EqualError(t, err, "error 2")
-	assert.Equal(t, "===> State\n", w.String())
-}
-
-func TestSetTokenPanicsAfterClientCreation(t *testing.T) {
-	state, _, _, _ := newState("list")
-	client := state.Client()
-	assert.NotNil(t, client)
-
-	assert.PanicsWithValue(
-		t,
-		"a client has already been created with the previous token",
-		func() {
-			state.SetToken(new(oauth2.Token))
-		},
-	)
-}
-
-func TestSetToken(t *testing.T) {
-	state, _, _, _ := newState("list")
-	assert.NotPanics(t, func() { state.SetToken(nil) })
-	assert.NotPanics(t, func() { state.SetToken(&oauth2.Token{}) })
-	assert.NotPanics(t, func() { state.SetToken(nil) })
-}
-
-func TestClientWithNoEnvironment(t *testing.T) {
-	state, _, _, _ := newState("list")
-	state.SetToken(nil)
-
-	client := state.Client()
-	assert.NotNil(t, client)
-
-	rl, _, err := client.RateLimits(ctx)
-	assert.NoError(t, err)
-	assert.Equal(t, 60, rl.Core.Limit)
-}
-
-func TestClientWithEnvironmentToken(t *testing.T) {
-	token, ok := os.LookupEnv("GITHUB_TOKEN")
-	assert.True(t, ok, "Missing environment variable GITHUB_TOKEN")
-
-	state, _, _, _ := newState("list")
-	state.SetToken(&oauth2.Token{AccessToken: token})
-
-	tok, err := state.Token()
-	assert.NotNil(t, tok)
-	assert.NoError(t, err)
-	assert.Equal(t, token, tok.AccessToken)
-
-	client := state.Client()
-	assert.NotNil(t, client)
-
-	rl, _, err := client.RateLimits(ctx)
-	assert.NoError(t, err)
-	assert.Truef(t, rl.Core.Limit >= 5000, "Rate Limit < 5000: %d", rl.Core.Limit)
-}
 
 func chain(v ...string) string {
 	w := strings.Builder{}
@@ -311,4 +47,179 @@ func chain(v ...string) string {
 
 func usageLine(flag, help string) string {
 	return fmt.Sprintf("  %s\n    \t%s\n", flag, help)
+}
+
+func TestState_ParseArguments(t *testing.T) {
+	type expected struct {
+		err     error
+		stdout  string
+		stderr  string
+		debug   bool
+		repo    string
+		timeout time.Duration
+	}
+
+	type testcase struct {
+		name     string
+		state    *app.State
+		expected expected
+	}
+
+	readBuffer := func(w io.Writer) string {
+		b, _ := w.(*bytes.Buffer)
+		buf, err := ioutil.ReadAll(b)
+		if err != nil {
+			panic(err)
+		}
+
+		return string(buf)
+	}
+
+	cases := []testcase{
+		{
+			"no arguments",
+			&app.State{App: newApp(nil)},
+			expected{
+				app.ErrActionRequired,
+				"",
+				usage,
+				false,
+				"github/gitignore",
+				time.Second * 30,
+			},
+		},
+		{
+			"invalid flag",
+			&app.State{App: newApp(nil, "--not-for-you")},
+			expected{
+				errors.New("flag provided but not defined: -not-for-you"),
+				"",
+				chain(
+					"flag provided but not defined: -not-for-you\n",
+					usage,
+				),
+				false,
+				"",
+				0,
+			},
+		},
+		{
+			"debug flag",
+			&app.State{App: newApp(nil, "-debug", "list")},
+			expected{
+				nil,
+				"",
+				"",
+				true,
+				"github/gitignore",
+				time.Second * 30,
+			},
+		},
+		{
+			"extreme timeout",
+			&app.State{App: newApp(nil, "-timeout", "30m", "list")},
+			expected{
+				nil,
+				"",
+				"",
+				false,
+				"github/gitignore",
+				time.Minute * 30,
+			},
+		},
+		{
+			"negative timeout",
+			&app.State{App: newApp(nil, "-timeout", "-30s", "list")},
+			expected{
+				nil,
+				"",
+				"",
+				false,
+				"github/gitignore",
+				0,
+			},
+		},
+		{
+			"custom repo",
+			&app.State{App: newApp(nil, "-repo", "demosdemon/gitignore", "list")},
+			expected{
+				nil,
+				"",
+				"",
+				false,
+				"demosdemon/gitignore",
+				time.Second * 30,
+			},
+		},
+		{
+			"invalid repo",
+			&app.State{App: newApp(nil, "-repo=invalid", "list")},
+			expected{
+				nil,
+				"",
+				"",
+				false,
+				"invalid",
+				time.Second * 30,
+			},
+		},
+	}
+
+	t.Parallel()
+	for _, tt := range cases {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			err := tt.state.ParseArguments()
+			assert.EqualValues(t, tt.expected.err, err)
+			assert.Equal(t, tt.expected.stdout, readBuffer(tt.state.Stdout))
+			assert.Equal(t, tt.expected.stderr, readBuffer(tt.state.Stderr))
+			assert.Equal(t, tt.expected.debug, tt.state.Debug())
+			assert.Equal(t, tt.expected.repo, tt.state.Repo())
+			assert.Equal(t, tt.expected.timeout, tt.state.Timeout())
+		})
+	}
+}
+
+func TestState_Command(t *testing.T) {
+	cases := []struct {
+		name  string
+		state *app.State
+		err   error
+	}{
+		{
+			"dump",
+			&app.State{App: newApp(nil, "dump")},
+			nil,
+		},
+		{
+			"list",
+			&app.State{App: newApp(nil, "list")},
+			nil,
+		},
+		{
+			"invalid",
+			&app.State{App: newApp(nil, "invalid")},
+			errors.New("unrecognized action invalid"),
+		},
+	}
+
+	t.Parallel()
+	for _, tt := range cases {
+		tt := tt
+		t.Run(tt.name, func(t *testing.T) {
+			err := tt.state.ParseArguments()
+			assert.NoError(t, err)
+
+			cmd, err := tt.state.Command()
+			assert.EqualValues(t, tt.err, err)
+
+			if cmd != nil {
+				name := cmd.GetName()
+				assert.Equal(t, tt.name, name)
+
+				rv := cmd.Run()
+				assert.EqualValues(t, 0, rv)
+			}
+		})
+	}
 }

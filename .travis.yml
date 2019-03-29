@@ -39,7 +39,6 @@ install:
   - go mod vendor
 
 script:
-  - golangci-lint run
   - make test
   - ls -lh update-gitignore
 

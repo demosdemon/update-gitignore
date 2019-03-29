@@ -7,7 +7,7 @@ LDFLAGS = -s -w -extldflags "-static"
 all: build
 
 .PHONY: build
-build: update-gitignore
+build: lint update-gitignore
 
 .PHONY: debug
 debug:
@@ -24,6 +24,10 @@ update-gitignore: $(SOURCE_FILES)
 install: all
 	install -d $(DESTDIR)/usr/bin
 	cp update-gitignore $(DESTDIR)/usr/bin
+
+.PHONY: lint
+lint:
+	golangci-lint run
 
 .PHONY: test
 test: build
