@@ -46,6 +46,13 @@ func (r replay) RoundTrip(req *http.Request) (*http.Response, error) {
 		}
 	}()
 
+	time.Sleep(time.Microsecond)
+	select {
+	case <-req.Context().Done():
+		return nil, req.Context().Err()
+	default:
+	}
+
 	if err := r.Validate(); err != nil {
 		return nil, err
 	}
@@ -80,7 +87,7 @@ func newReplay(key string) http.RoundTripper {
 }
 
 func newClient(env []string, key string) *app.Client {
-	a := newApp(env, "test")
+	a := newApp(env, "-timeout=0", "test")
 	s := app.State{App: a}
 	_ = s.ParseArguments()
 	c, _ := s.Client()

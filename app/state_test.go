@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"net/http"
 	"strings"
 	"testing"
 	"time"
@@ -251,4 +252,14 @@ func TestState_Client(t *testing.T) {
 			errEquals(t, tt.err, err)
 		})
 	}
+}
+
+func TestState_deadline(t *testing.T) {
+	a := newApp(nil, "-timeout", "1ns", "test")
+	s := app.State{App: a}
+	_ = s.ParseArguments()
+	c, _ := s.Client()
+	c.SetHTTPClient(&http.Client{Transport: newReplay("anonymous")})
+	_, err := c.GetBlob("0000000000000000000000000000000000000000")
+	assert.EqualError(t, err, "context deadline exceeded")
 }
