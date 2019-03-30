@@ -1,4 +1,5 @@
-SOURCE_FILES := $(shell find . -type f -not -path './vendor/*' -iname '*.go')
+SOURCE_FILES = $(shell find . -type f -not -path './vendor/*' -iname '*.go' -not -iname '*_test.go')
+TEST_FILES = $(shell find . -type f -not -path './vendor/*' -iname '*_test.go')
 
 LDFLAGS = -s -w -extldflags "-static"
 
@@ -6,7 +7,7 @@ LDFLAGS = -s -w -extldflags "-static"
 all: build
 
 .PHONY: build
-build: update-gitignore
+build: lint update-gitignore
 
 .PHONY: debug
 debug:
@@ -14,7 +15,7 @@ debug:
 
 .PHONY: format
 format:
-	goreturns -b -i -w $(SOURCE_FILES)
+	goreturns -b -i -w $(SOURCE_FILES) $(TEST_FILES)
 
 update-gitignore: $(SOURCE_FILES)
 	go build -a -ldflags '$(LDFLAGS)'
@@ -23,3 +24,12 @@ update-gitignore: $(SOURCE_FILES)
 install: all
 	install -d $(DESTDIR)/usr/bin
 	cp update-gitignore $(DESTDIR)/usr/bin
+
+.PHONY: lint
+lint:
+	golangci-lint run
+
+.PHONY: test
+test: build
+	ls -lh update-gitignore
+	go test -v -timeout 30s -covermode=count -coverprofile=coverage.out -coverpkg ./... -benchmem -bench=. ./...

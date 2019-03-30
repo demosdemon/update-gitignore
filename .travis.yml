@@ -20,11 +20,6 @@ os:
 
 dist: xenial
 
-matrix:
-  fast_finish: true
-  allow_failures:
-    - go: master
-
 before_install:
   - if [[ $TRAVIS_OS_NAME == linux ]]; then pip install --user --upgrade awscli; fi
   - if [[ $TRAVIS_OS_NAME == osx ]]; then pip install --upgrade awscli; fi
@@ -32,23 +27,23 @@ before_install:
   - aws --version
   - curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sh -s -- -b "$(go env GOPATH)/bin" v1.15.0
   - golangci-lint --version
-  - go get -u golang.org/x/tools/cmd/cover
-  - go get -u github.com/mattn/goveralls
+  - go install golang.org/x/tools/cmd/cover
+  - go install github.com/mattn/goveralls
 
 install:
   - go mod vendor
 
 script:
-  - golangci-lint run
-  - go test -v -covermode=count -coverprofile=coverage.out ./...
-  - make build
-  - ls -lh update-gitignore
+  - make test
 
 after_success:
   - goveralls -coverprofile=coverage.out -service=travis-ci -repotoken $COVERALLS_TOKEN
 
 after_script:
-  - aws s3 cp ./update-gitignore "s3://$ARTIFACTS_BUCKET/$TRAVIS_REPO_SLUG/$TRAVIS_BUILD_NUMBER/$TRAVIS_GO_VERSION/update-gitignore-$(go env GOOS)-$(go env GOARCH)"
+  - ARTIFACT_PREFIX="s3://$ARTIFACTS_BUCKET/$TRAVIS_REPO_SLUG/$TRAVIS_BUILD_NUMBER/$TRAVIS_GO_VERSION"
+  - ARTIFACT_SUFFIX="$(go env GOOS)-$(go env GOARCH)"
+  - aws s3 cp ./update-gitignore "$ARTIFACT_PREFIX/update-gitignore-$ARTIFACT_SUFFIX"
+  # - aws s3 cp ./trace.out "$ARTIFACT_PREFIX/trace-$ARTIFACT_SUFFIX.log"
 
 notifications:
   slack:

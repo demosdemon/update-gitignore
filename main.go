@@ -1,33 +1,37 @@
 package main
 
 import (
-	"context"
-	"errors"
-	"fmt"
-	"os"
-	"time"
-
 	"github.com/demosdemon/update-gitignore/app"
 )
 
-var args = os.Args[1:]
+var instance = app.New()
 
 func main() {
-	defer app.PanicOnError(app.InitLogging())
+	defer instance.Logger().ShutdownLoggers()
+	done := make(chan struct{})
 
-	state := app.NewState(args)
-
-	ctx, cancel := context.WithTimeout(context.Background(), time.Minute*5)
-	defer cancel()
-	tree := state.Tree(ctx)
-
-	switch {
-	case state.Dump:
-	case state.List:
-		for v := range tree {
-			fmt.Printf("%+v\n", v)
+	go func() {
+		for err := range instance.Errors() {
+			instance.Logger().Error(err.Error())
 		}
-	default:
-		panic(errors.New("how did we get here"))
+
+		done <- struct{}{}
+	}()
+
+	state := app.State{App: instance}
+	err := state.ParseArguments()
+	if err != nil {
+		state.HandleError(err)
+		<-done
+		instance.Exit(2)
 	}
+
+	cmd, err := state.Command()
+	if err != nil {
+		state.HandleError(err)
+		<-done
+		instance.Exit(2)
+	}
+
+	instance.Exit(int(cmd.Run()))
 }

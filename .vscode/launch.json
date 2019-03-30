@@ -12,7 +12,8 @@
     "env": {},
     "args": [
       "-debug",
-      "-list",
+      "list",
+      "golang",
     ]
   }]
 }

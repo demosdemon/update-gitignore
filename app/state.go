@@ -1,99 +1,148 @@
 package app
 
 import (
+	"context"
 	"errors"
 	"flag"
 	"fmt"
-	"os"
 	"strings"
+	"time"
 
 	"github.com/aphistic/gomol"
 )
 
 var (
-	debug = flag.Bool("debug", false, "Print debug statements to STDERR.")
-	dump  = flag.Bool("dump", false, "Dump the specified templates to STDOUT.")
-	list  = flag.Bool("list", false, "List the available templates. If any, arguments are used to filter the results.")
-	repo  = flag.String("repo", "github/gitignore", "The template repo to use.")
+	// ErrActionRequired is returned when no command action is provided
+	ErrActionRequired = errors.New("need an action")
+	// ErrInvalidRepo is returned if the repo provided on the command line does not look like <owner>/<name>.
+	ErrInvalidRepo = errors.New("invalid repo")
 )
 
 // The State of the application.
 type State struct {
-	// command line arguments
-	Dump      bool
-	List      bool
-	Templates []string
+	*App
 
-	// calculated from cmdline -repo
-	Owner string
-	Repo  string
+	// command-line flags
+	debug     bool
+	repo      string
+	timeout   time.Duration
+	action    string
+	templates []string
 }
 
-// NewState build a new application state object
-func NewState(arguments []string) *State {
-	*debug = false
-	*dump = false
-	*list = false
+func (s *State) ParseArguments() error {
+	fs := flag.NewFlagSet("update-gitignore", flag.ContinueOnError)
+	fs.SetOutput(s.Stderr)
+	fs.Usage = usage(fs)
 
-	flag.Usage = usage
-	// use a var so args can be mocked in tests
-	_ = flag.CommandLine.Parse(arguments)
+	debug := fs.Bool("debug", false, "print debug statements to STDERR")
+	repo := fs.String("repo", "github/gitignore", "the template repository to use")
+	timeout := fs.Duration("timeout", time.Second*30, "the max duration for network requests (0 for no timeout)")
 
-	if *debug {
-		gomol.SetLogLevel(gomol.LevelDebug)
+	if err := fs.Parse(s.Arguments); err != nil {
+		return err
+	}
+
+	s.SetDebug(*debug)
+	s.SetRepo(*repo)
+	s.SetTimeout(*timeout)
+
+	args := fs.Args()
+	if len(args) == 0 {
+		fs.Usage()
+		return ErrActionRequired
+	}
+
+	s.action = args[0]
+	s.templates = args[1:]
+	return nil
+}
+
+func (s *State) SetDebug(debug bool) {
+	logger := s.Logger()
+	s.debug = debug
+
+	if s.debug {
+		logger.SetLogLevel(gomol.LevelDebug)
 	} else {
-		gomol.SetLogLevel(gomol.LevelInfo)
+		logger.SetLogLevel(gomol.LevelInfo)
 	}
-
-	slice := strings.SplitN(*repo, "/", 2)
-	if len(slice) != 2 {
-		panic(fmt.Errorf("invalid repo %v", slice))
-	}
-
-	state := &State{
-		Dump:      *dump,
-		List:      *list,
-		Templates: flag.Args(),
-		Owner:     slice[0],
-		Repo:      slice[1],
-	}
-
-	// command line options
-	gomol.Debugf("Dump       = %t", state.Dump)
-	gomol.Debugf("List       = %t", state.List)
-	gomol.Debugf("Owner      = %s", state.Owner)
-	gomol.Debugf("Repo       = %s", state.Repo)
-	gomol.Debugf("Templates  = %v", state.Templates)
-	// XXX: add os.Environ()?
-	gomol.Debugf("executable = %s", stringOrError(os.Executable))
-	gomol.Debugf("euid       = %d", os.Geteuid())
-	gomol.Debugf("euid       = %d", os.Geteuid())
-	gomol.Debugf("egid       = %d", os.Getegid())
-	gomol.Debugf("uid        = %d", os.Getuid())
-	gomol.Debugf("gid        = %d", os.Getgid())
-	// XXX: add os.Groups()
-	gomol.Debugf("pid        = %d", os.Getpid())
-	gomol.Debugf("ppid       = %d", os.Getppid())
-	gomol.Debugf("cwd        = %s", stringOrError(os.Getwd))
-	gomol.Debugf("hostname   = %s", stringOrError(os.Hostname))
-
-	if state.Dump && state.List {
-		panic(errors.New("-dump and -list are mutually exclusive"))
-	}
-
-	if !state.Dump && !state.List {
-		panic(errors.New("one of -dump or -list is required"))
-	}
-
-	if state.Dump && len(state.Templates) == 0 {
-		panic(errors.New("must provide at least one template with -dump"))
-	}
-
-	return state
 }
 
-// Usage prints command line usage information.
-func usage() {
-	fmt.Printf("usage: %s [flags] [template ...]\n", os.Args[0])
-	flag.PrintDefaults()
+func (s *State) Debug() bool {
+	return s.debug
+}
+
+func (s *State) SetRepo(repo string) {
+	s.repo = repo
+}
+
+func (s *State) Repo() string {
+	return s.repo
+}
+
+func (s *State) SetTimeout(timeout time.Duration) {
+	if timeout < 0 {
+		timeout = 0
+	}
+
+	s.timeout = timeout
+}
+
+func (s *State) Timeout() time.Duration {
+	return s.timeout
+}
+
+func (s *State) Command() (Command, error) {
+	switch s.action {
+	case "dump":
+		return (*dumpCommand)(s), nil
+	case "list":
+		return (*listCommand)(s), nil
+	default:
+		return nil, fmt.Errorf("unrecognized action %s", s.action)
+	}
+}
+
+func (s *State) Client() (*Client, error) {
+	slice := strings.SplitN(s.repo, "/", 2)
+	if len(slice) != 2 {
+		return nil, ErrInvalidRepo
+	}
+
+	cl := &Client{
+		state: s,
+		owner: slice[0],
+		repo:  slice[1],
+	}
+	cl.SetHTTPClient(nil)
+
+	return cl, nil
+}
+
+func (s *State) deadline() (context.Context, context.CancelFunc) {
+	if s.timeout > 0 {
+		return context.WithTimeout(s.Context, s.timeout)
+	}
+
+	return s.Context, func() {}
+}
+
+func usage(flagset *flag.FlagSet) func() {
+	return func() {
+		fmt.Fprintln(flagset.Output(), `usage: update-gitignore [{flags}] {action} [{template}...]
+Actions:
+  dump - dumps the selected template(s) to STDOUT
+  list - lists the available templates, optionally filtered by the provided arguments
+
+{flags}    - Command line flags (see below)
+{template} - The Template to dump (required for "dump") or a search string to filter (optional for "list")
+
+Examples:
+  update-gitignore list go
+  update-gitignore -debug dump Go > .gitignore
+
+Flags:`)
+		flagset.PrintDefaults()
+	}
 }

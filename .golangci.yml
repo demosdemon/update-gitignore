@@ -3,8 +3,19 @@ linters-settings:
     exclude: .errcheck-excludes
   golint:
     min-confidence: 0
+  lll:
+    line-length: 120
+    tab-width: 4
+  goimports:
+    local-prefixes: github.com/demosdemon/update-gitignore
 
 linters:
   enable-all: true
   disable:
     - gochecknoglobals
+
+issues:
+  exclude-rules:
+    - path: _test\.go
+      linters:
+        - lll
