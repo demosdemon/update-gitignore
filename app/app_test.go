@@ -13,7 +13,7 @@ import (
 	"github.com/aphistic/gomol"
 	"github.com/stretchr/testify/assert"
 
-	"github.com/demosdemon/update-gitignore/app"
+	"github.com/demosdemon/update-gitignore/v0/app"
 )
 
 func newApp(environ []string, args ...string) *app.App {

@@ -17,7 +17,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/demosdemon/update-gitignore/app"
+	"github.com/demosdemon/update-gitignore/v0/app"
 )
 
 type replay string

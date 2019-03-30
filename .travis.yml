@@ -42,8 +42,7 @@ after_success:
 after_script:
   - ARTIFACT_PREFIX="s3://$ARTIFACTS_BUCKET/$TRAVIS_REPO_SLUG/$TRAVIS_BUILD_NUMBER/$TRAVIS_GO_VERSION"
   - ARTIFACT_SUFFIX="$(go env GOOS)-$(go env GOARCH)"
-  - aws s3 cp ./update-gitignore "$ARTIFACT_PREFIX/update-gitignore-$ARTIFACT_SUFFIX"
-  # - aws s3 cp ./trace.out "$ARTIFACT_PREFIX/trace-$ARTIFACT_SUFFIX.log"
+  - aws s3 sync ./build/ "$ARTIFACT_PREFIX/$ARTIFACT_SUFFIX/"
 
 notifications:
   slack:

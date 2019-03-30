@@ -1,4 +1,4 @@
-module github.com/demosdemon/update-gitignore
+module github.com/demosdemon/update-gitignore/v0
 
 go 1.12
 

@@ -1,8 +1,8 @@
-github.com/demosdemon/update-gitignore/app.newLogger
-(*github.com/demosdemon/update-gitignore/app.State).PrintDebug
-(*github.com/demosdemon/update-gitignore/app.State).Token
-(*github.com/demosdemon/update-gitignore/app.State).Logger
-(*github.com/demosdemon/update-gitignore/app.State).ShutdownLoggers
+github.com/demosdemon/update-gitignore/v0/app.newLogger
+(*github.com/demosdemon/update-gitignore/v0/app.State).PrintDebug
+(*github.com/demosdemon/update-gitignore/v0/app.State).Token
+(*github.com/demosdemon/update-gitignore/v0/app.State).Logger
+(*github.com/demosdemon/update-gitignore/v0/app.State).ShutdownLoggers
 (*github.com/aphistic/gomol.Base).RemoveLogger
 (*github.com/aphistic/gomol.Base).ClearLoggers
 (*github.com/aphistic/gomol.Base).ShutdownLoggers

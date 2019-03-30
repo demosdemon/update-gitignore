@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/demosdemon/update-gitignore/app"
+	"github.com/demosdemon/update-gitignore/v0/app"
 )
 
 var instance = app.New()
