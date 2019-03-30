@@ -24,6 +24,7 @@ type App struct {
 	Stdin       io.Reader
 	Stdout      io.Writer
 	Stderr      io.Writer
+	Exit        func(int)
 
 	loggerMu sync.Mutex
 	logger   *gomol.Base
@@ -40,6 +41,7 @@ func New() *App {
 		Stdin:       os.Stdin,
 		Stdout:      os.Stdout,
 		Stderr:      os.Stderr,
+		Exit:        os.Exit,
 	}
 }
 
@@ -100,6 +102,7 @@ func (a *App) Errors() <-chan error {
 
 func (a *App) HandleError(err error) {
 	a.ensureErrorChannel()
+	defer close(a.errch)
 	select {
 	case a.errch <- err:
 	case <-a.Context.Done():

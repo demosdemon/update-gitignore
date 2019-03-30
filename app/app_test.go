@@ -4,10 +4,12 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"fmt"
 	"math/rand"
 	"os"
 	"sync"
 	"testing"
+	"time"
 
 	"github.com/aphistic/gomol"
 	"github.com/stretchr/testify/assert"
@@ -23,6 +25,9 @@ func newApp(environ []string, args ...string) *app.App {
 		Stdin:       new(bytes.Buffer),
 		Stdout:      new(bytes.Buffer),
 		Stderr:      new(bytes.Buffer),
+		Exit: func(code int) {
+			panic(fmt.Sprintf("system exit %d", code))
+		},
 	}
 }
 
@@ -34,6 +39,7 @@ func TestNew(t *testing.T) {
 		Stdin:       os.Stdin,
 		Stdout:      os.Stdout,
 		Stderr:      os.Stderr,
+		Exit:        os.Exit,
 	}
 
 	p, ok := expected.LookupEnv("HOME")
@@ -93,33 +99,30 @@ func TestApp_Errors(t *testing.T) {
 }
 
 func TestApp_HandleError(t *testing.T) {
-	ctx, cancel := context.WithCancel(context.Background())
 	a := newApp(nil)
-	a.Context = ctx
-
-	ch := a.Errors()
 	err := errors.New("test error")
-	n := rand.Intn(8) + 2
-	for i := 0; i < n; i++ {
-		go func() {
-			a.HandleError(err)
-		}()
-	}
+	go a.HandleError(err)
+	time.Sleep(time.Millisecond)
 
-	n -= 2
-	for i := 0; i < n; i++ {
-		x, ok := <-ch
+	select {
+	case x, ok := <-a.Errors():
 		assert.True(t, ok)
 		assert.Equal(t, err, x)
+	default:
+		assert.Fail(t, "channel blocked")
 	}
 
-	cancel()
 	select {
-	case <-ch:
-		assert.Fail(t, "channel did not block")
+	case x, ok := <-a.Errors():
+		assert.False(t, ok)
+		assert.NoError(t, x)
 	default:
-		// pass
+		assert.Fail(t, "channel blocked")
 	}
+
+	assert.Panics(t, func() {
+		a.HandleError(err)
+	})
 }
 
 func TestApp_LookupEnv(t *testing.T) {
