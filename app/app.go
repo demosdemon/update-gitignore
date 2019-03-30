@@ -12,9 +12,8 @@ import (
 )
 
 const (
-	logTemplate = `{{.Template.Format "2006-01-02 15:04:05.000"}} [{{color}}{{ucase .LevelName}}{{reset}}] {{.Message}}`
-
-	fullLogTemplate = logTemplate + `{{if .Attrs}} {{json .Attrs}}{{end}}`
+	timestamp   = `{{.Timestamp.Format "2006-01-02 15:04:05.000"}} `
+	logTemplate = `[{{color}}{{ucase .LevelName}}{{reset}}] {{.Message}}{{if .Attrs}} {{json .Attrs}}{{end}}`
 )
 
 type App struct {
@@ -58,8 +57,12 @@ func (a *App) Logger() *gomol.Base {
 		// err is always nil
 		consoleLogger, _ := gomolconsole.NewConsoleLogger(&consoleConfig)
 
+		template := logTemplate
+		if a.Stderr == os.Stderr {
+			template = timestamp + template
+		}
 		// err is always nil because the template is not dynamic and I tested it at least once
-		tpl, _ := gomol.NewTemplate(fullLogTemplate)
+		tpl, _ := gomol.NewTemplate(template)
 
 		// err is always nil if the template is non-nil
 		_ = consoleLogger.SetTemplate(tpl)
@@ -81,6 +84,8 @@ func (a *App) Logger() *gomol.Base {
 		_ = logger.AddLogger(consoleLogger)
 
 		a.logger = logger
+
+		_ = logger.InitLoggers()
 	}
 
 	return a.logger

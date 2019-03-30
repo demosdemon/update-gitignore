@@ -40,12 +40,15 @@ func TestNew(t *testing.T) {
 		Stderr:      os.Stderr,
 		Exit:        os.Exit,
 	}
+	defer expected.Logger().ShutdownLoggers()
 
 	p, ok := expected.LookupEnv("HOME")
 	assert.NotZero(t, p)
 	assert.True(t, ok)
 
 	res := app.New()
+	defer res.Logger().ShutdownLoggers()
+
 	v, ok := res.LookupEnv("HOME")
 	assert.Equal(t, p, v)
 	assert.True(t, ok)
@@ -72,6 +75,8 @@ func TestApp_Logger(t *testing.T) {
 	for o := range ch {
 		assert.Equal(t, l, o)
 	}
+
+	l.ShutdownLoggers()
 }
 
 func TestApp_Errors(t *testing.T) {

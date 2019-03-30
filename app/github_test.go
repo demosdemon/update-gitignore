@@ -86,13 +86,13 @@ func newReplay(key string) http.RoundTripper {
 	return replay(filepath.Join(root, key))
 }
 
-func newClient(env []string, key string) *app.Client {
+func newClient(env []string, key string) (*app.App, *app.Client) {
 	a := newApp(env, "-timeout=0", "test")
 	s := app.State{App: a}
 	_ = s.ParseArguments()
 	c, _ := s.Client()
 	c.SetHTTPClient(&http.Client{Transport: newReplay(key)})
-	return c
+	return a, c
 }
 
 func strptr(s string) *string {
@@ -233,7 +233,8 @@ func TestClient_Token(t *testing.T) {
 	for _, tt := range cases {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
-			c := newClient(tt.environment, "invalid")
+			a, c := newClient(tt.environment, "invalid")
+			defer a.Logger().ShutdownLoggers()
 			require.NotNil(t, c)
 
 			tok, err := c.Token()
@@ -245,6 +246,7 @@ func TestClient_Token(t *testing.T) {
 
 func TestClient_GitHubClient(t *testing.T) {
 	a := newApp([]string{"GITHUB_TOKEN=faketoken"}, "test")
+	defer a.Logger().ShutdownLoggers()
 	s := app.State{App: a}
 	err := s.ParseArguments()
 	assert.NoError(t, err)
@@ -305,7 +307,8 @@ func TestClient_GetUser(t *testing.T) {
 	for _, tt := range cases {
 		tt := tt
 		t.Run(tt.key, func(t *testing.T) {
-			c := newClient(nil, tt.key)
+			a, c := newClient(nil, tt.key)
+			defer a.Logger().ShutdownLoggers()
 			require.NotNil(t, c)
 
 			user, err := c.GetUser()
@@ -343,7 +346,8 @@ func TestClient_GetRateLimits(t *testing.T) {
 	for _, tt := range cases {
 		tt := tt
 		t.Run(tt.key, func(t *testing.T) {
-			c := newClient(nil, tt.key)
+			a, c := newClient(nil, tt.key)
+			defer a.Logger().ShutdownLoggers()
 			require.NotNil(t, c)
 
 			rl, err := c.GetRateLimits()
@@ -381,7 +385,8 @@ func TestClient_GetRepository(t *testing.T) {
 	for _, tt := range cases {
 		tt := tt
 		t.Run(tt.key, func(t *testing.T) {
-			c := newClient(nil, tt.key)
+			a, c := newClient(nil, tt.key)
+			defer a.Logger().ShutdownLoggers()
 			require.NotNil(t, c)
 
 			repo, err := c.GetRepository()
@@ -428,7 +433,8 @@ func TestClient_GetBranch(t *testing.T) {
 	for _, tt := range cases {
 		tt := tt
 		t.Run(tt.key, func(t *testing.T) {
-			c := newClient(nil, tt.key)
+			a, c := newClient(nil, tt.key)
+			defer a.Logger().ShutdownLoggers()
 			require.NotNil(t, c)
 
 			branch, err := c.GetBranch("master")
@@ -490,7 +496,8 @@ func TestClient_GetTree(t *testing.T) {
 	for _, tt := range cases {
 		tt := tt
 		t.Run(tt.key+" "+tt.sha, func(t *testing.T) {
-			c := newClient(nil, tt.key)
+			a, c := newClient(nil, tt.key)
+			defer a.Logger().ShutdownLoggers()
 			require.NotNil(t, c)
 
 			tree, err := c.GetTree(tt.sha)

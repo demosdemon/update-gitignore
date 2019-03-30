@@ -7,6 +7,7 @@ import (
 var instance = app.New()
 
 func main() {
+	defer instance.Logger().ShutdownLoggers()
 	done := make(chan struct{})
 
 	go func() {
@@ -25,5 +26,12 @@ func main() {
 		instance.Exit(2)
 	}
 
-	instance.Exit(0)
+	cmd, err := state.Command()
+	if err != nil {
+		state.HandleError(err)
+		<-done
+		instance.Exit(2)
+	}
+
+	instance.Exit(int(cmd.Run()))
 }

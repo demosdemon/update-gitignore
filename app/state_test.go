@@ -169,6 +169,7 @@ func TestState_ParseArguments(t *testing.T) {
 	for _, tt := range cases {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
+			defer tt.state.Logger().ShutdownLoggers()
 			err := tt.state.ParseArguments()
 			errEquals(t, tt.expected.err, err)
 			assert.Equal(t, tt.expected.stdout, readBuffer(tt.state.Stdout))
@@ -207,6 +208,7 @@ func TestState_Command(t *testing.T) {
 	for _, tt := range cases {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
+			defer tt.state.Logger().ShutdownLoggers()
 			err := tt.state.ParseArguments()
 			assert.NoError(t, err)
 
@@ -246,6 +248,7 @@ func TestState_Client(t *testing.T) {
 	for _, tt := range cases {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
+			defer tt.state.Logger().ShutdownLoggers()
 			err := tt.state.ParseArguments()
 			assert.NoError(t, err)
 			_, err = tt.state.Client()
@@ -256,6 +259,7 @@ func TestState_Client(t *testing.T) {
 
 func TestState_deadline(t *testing.T) {
 	a := newApp(nil, "-timeout", "1ns", "test")
+	defer a.Logger().ShutdownLoggers()
 	s := app.State{App: a}
 	_ = s.ParseArguments()
 	c, _ := s.Client()
