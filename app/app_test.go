@@ -9,7 +9,6 @@ import (
 	"os"
 	"sync"
 	"testing"
-	"time"
 
 	"github.com/aphistic/gomol"
 	"github.com/stretchr/testify/assert"
@@ -101,8 +100,13 @@ func TestApp_Errors(t *testing.T) {
 func TestApp_HandleError(t *testing.T) {
 	a := newApp(nil)
 	err := errors.New("test error")
-	go a.HandleError(err)
-	time.Sleep(time.Millisecond)
+	done := make(chan struct{})
+	go func() {
+		a.HandleError(err)
+		done <- struct{}{}
+	}()
+
+	<-done
 
 	select {
 	case x, ok := <-a.Errors():

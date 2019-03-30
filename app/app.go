@@ -91,7 +91,7 @@ func (a *App) ensureErrorChannel() {
 	defer a.errchMu.Unlock()
 
 	if a.errch == nil {
-		a.errch = make(chan error)
+		a.errch = make(chan error, 1)
 	}
 }
 
