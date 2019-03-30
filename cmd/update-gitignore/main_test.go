@@ -8,7 +8,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/demosdemon/update-gitignore/app"
+	"github.com/demosdemon/update-gitignore/v0/app"
 )
 
 func TestMain(t *testing.T) {

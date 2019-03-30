@@ -7,7 +7,7 @@ import (
 	"github.com/google/go-github/v24/github"
 	"github.com/stretchr/testify/require"
 
-	"github.com/demosdemon/update-gitignore/app"
+	"github.com/demosdemon/update-gitignore/v0/app"
 )
 
 func TestNewTemplate(t *testing.T) {
