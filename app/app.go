@@ -103,10 +103,7 @@ func (a *App) Errors() <-chan error {
 func (a *App) HandleError(err error) {
 	a.ensureErrorChannel()
 	defer close(a.errch)
-	select {
-	case a.errch <- err:
-	case <-a.Context.Done():
-	}
+	a.errch <- err
 }
 
 func (a *App) LookupEnv(key string) (string, bool) {
