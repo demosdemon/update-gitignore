@@ -20,11 +20,6 @@ os:
 
 dist: xenial
 
-matrix:
-  fast_finish: true
-  allow_failures:
-    - go: master
-
 before_install:
   - if [[ $TRAVIS_OS_NAME == linux ]]; then pip install --user --upgrade awscli; fi
   - if [[ $TRAVIS_OS_NAME == osx ]]; then pip install --upgrade awscli; fi
