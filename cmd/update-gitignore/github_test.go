@@ -1,7 +1,9 @@
-package app_test
+package main
 
 import (
 	"bufio"
+	"bytes"
+	"context"
 	"fmt"
 	"math/rand"
 	"net/http"
@@ -17,8 +19,22 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/demosdemon/update-gitignore/v0/app"
+	"github.com/demosdemon/golang-app-framework/app"
 )
+
+func newApp(environ []string, args ...string) *app.App {
+	return &app.App{
+		Arguments:   args,
+		Environment: environ,
+		Context:     context.Background(),
+		Stdin:       new(bytes.Buffer),
+		Stdout:      new(bytes.Buffer),
+		Stderr:      new(bytes.Buffer),
+		ExitHandler: func(code int) {
+			panic(fmt.Sprintf("system exit %d", code))
+		},
+	}
+}
 
 type replay string
 
@@ -86,9 +102,9 @@ func newReplay(key string) http.RoundTripper {
 	return replay(filepath.Join(root, key))
 }
 
-func newClient(env []string, key string) (*app.App, *app.Client) {
+func newClient(env []string, key string) (*app.App, *Client) {
 	a := newApp(env, "-timeout=0", "test")
-	s := app.State{App: a}
+	s := State{App: a}
 	_ = s.ParseArguments()
 	c, _ := s.Client()
 	c.SetHTTPClient(&http.Client{Transport: newReplay(key)})
@@ -111,7 +127,8 @@ func errEquals(tb testing.TB, expected *string, actual error) bool {
 	return assert.EqualError(tb, actual, *expected)
 }
 
-func equals(expected, actual interface{}) bool {
+func equals(tb testing.TB, expected, actual interface{}) bool {
+	assert := require.New(tb)
 	expectedValue := reflect.ValueOf(expected)
 	if expectedValue.Kind() == reflect.Ptr {
 		expectedValue = expectedValue.Elem()
@@ -134,65 +151,31 @@ func equals(expected, actual interface{}) bool {
 
 		e := expectedValue.FieldByName(field.Name)
 		a := actualValue.FieldByName(field.Name)
-		if a.Kind() == reflect.Invalid {
-			return false
-		}
+		assert.True(a.IsValid(), "field %s", field.Name)
+
 		if a.Kind() == reflect.Ptr {
 			a = a.Elem()
 		}
-		if e.Kind() != a.Kind() {
-			return false
-		}
+		assert.Equal(e.Kind(), a.Kind(), "field %s", field.Name)
 
 		switch field.Type.Kind() {
-		case reflect.Bool:
-			if e.Bool() != a.Bool() {
-				return false
-			}
-		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-			if e.Int() != a.Int() {
-				return false
-			}
-		case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uintptr:
-			if e.Uint() != a.Uint() {
-				return false
-			}
-		case reflect.Float32, reflect.Float64:
-			if e.Float() != a.Float() {
-				return false
-			}
-		case reflect.Complex64, reflect.Complex128:
-			if e.Complex() != a.Complex() {
-				return false
-			}
-		case reflect.String:
-			if e.String() != a.String() {
-				return false
-			}
 		case reflect.Struct:
-			if !equals(e.Interface(), a.Interface()) {
-				return false
-			}
+			equals(tb, e.Interface(), a.Interface())
 		case reflect.Slice:
-			if e.Len() != a.Len() {
-				return false
-			}
+			assert.Equal(e.Len(), a.Len(), "field %s", field.Name)
+
 			for i := 0; i < e.Len(); i++ {
 				x := e.Index(i)
 				y := e.Index(i)
-				if x.Kind() == y.Kind() && x.Kind() == reflect.Struct {
-					if !equals(x.Interface(), y.Interface()) {
-						return false
-					}
+				if x.Kind() == reflect.Struct {
+					assert.Equal(reflect.Struct, y.Kind())
+					equals(tb, x.Interface(), y.Interface())
 				} else {
-					if !reflect.DeepEqual(x.Interface(), y.Interface()) {
-						return false
-					}
+					assert.Equal(x, y, "field %s.%d", field.Name, i)
 				}
 			}
-
 		default:
-			panic(fmt.Errorf("cannot handle kind %v", field.Type.Kind()))
+			assert.EqualValues(e.Interface(), a.Interface())
 		}
 	}
 
@@ -238,7 +221,7 @@ func TestClient_Token(t *testing.T) {
 			require.NotNil(t, c)
 
 			tok, err := c.Token()
-			assert.True(t, equals(tt.fields, tok))
+			equals(t, tt.fields, tok)
 			errEquals(t, tt.err, err)
 		})
 	}
@@ -247,7 +230,7 @@ func TestClient_Token(t *testing.T) {
 func TestClient_GitHubClient(t *testing.T) {
 	a := newApp([]string{"GITHUB_TOKEN=faketoken"}, "test")
 	defer a.Logger().ShutdownLoggers()
-	s := app.State{App: a}
+	s := State{App: a}
 	err := s.ParseArguments()
 	assert.NoError(t, err)
 	c, err := s.Client()
@@ -312,7 +295,7 @@ func TestClient_GetUser(t *testing.T) {
 			require.NotNil(t, c)
 
 			user, err := c.GetUser()
-			assert.True(t, equals(tt.fields, user))
+			equals(t, tt.fields, user)
 			errEquals(t, tt.err, err)
 		})
 	}
@@ -390,7 +373,7 @@ func TestClient_GetRepository(t *testing.T) {
 			require.NotNil(t, c)
 
 			repo, err := c.GetRepository()
-			assert.True(t, equals(tt.fields, repo))
+			equals(t, tt.fields, repo)
 			errEquals(t, tt.err, err)
 		})
 	}
@@ -438,7 +421,7 @@ func TestClient_GetBranch(t *testing.T) {
 			require.NotNil(t, c)
 
 			branch, err := c.GetBranch("master")
-			assert.True(t, equals(tt.fields, branch))
+			equals(t, tt.fields, branch)
 			errEquals(t, tt.err, err)
 		})
 	}
@@ -501,7 +484,7 @@ func TestClient_GetTree(t *testing.T) {
 			require.NotNil(t, c)
 
 			tree, err := c.GetTree(tt.sha)
-			assert.True(t, equals(tt.fields, tree))
+			equals(t, tt.fields, tree)
 			errEquals(t, tt.err, err)
 		})
 	}

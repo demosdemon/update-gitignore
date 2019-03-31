@@ -1,4 +1,4 @@
-package app_test
+package main
 
 import (
 	"bytes"
@@ -11,12 +11,10 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
-
-	"github.com/demosdemon/update-gitignore/v0/app"
 )
 
 var (
-	usage = chain(
+	usageValue = chain(
 		"usage: update-gitignore [{flags}] {action} [{template}...]\n",
 		"Actions:\n",
 		"  dump - dumps the selected template(s) to STDOUT\n",
@@ -61,7 +59,7 @@ func TestState_ParseArguments(t *testing.T) {
 
 	type testcase struct {
 		name     string
-		state    *app.State
+		state    *State
 		expected expected
 	}
 
@@ -78,11 +76,11 @@ func TestState_ParseArguments(t *testing.T) {
 	cases := []testcase{
 		{
 			"no arguments",
-			&app.State{App: newApp(nil)},
+			&State{App: newApp(nil)},
 			expected{
 				strptr("need an action"),
 				"",
-				usage,
+				usageValue,
 				false,
 				"github/gitignore",
 				time.Second * 30,
@@ -90,13 +88,13 @@ func TestState_ParseArguments(t *testing.T) {
 		},
 		{
 			"invalid flag",
-			&app.State{App: newApp(nil, "--not-for-you")},
+			&State{App: newApp(nil, "--not-for-you")},
 			expected{
 				strptr("flag provided but not defined: -not-for-you"),
 				"",
 				chain(
 					"flag provided but not defined: -not-for-you\n",
-					usage,
+					usageValue,
 				),
 				false,
 				"",
@@ -105,7 +103,7 @@ func TestState_ParseArguments(t *testing.T) {
 		},
 		{
 			"debug flag",
-			&app.State{App: newApp(nil, "-debug", "list")},
+			&State{App: newApp(nil, "-debug", "list")},
 			expected{
 				nil,
 				"",
@@ -117,7 +115,7 @@ func TestState_ParseArguments(t *testing.T) {
 		},
 		{
 			"extreme timeout",
-			&app.State{App: newApp(nil, "-timeout", "30m", "list")},
+			&State{App: newApp(nil, "-timeout", "30m", "list")},
 			expected{
 				nil,
 				"",
@@ -129,7 +127,7 @@ func TestState_ParseArguments(t *testing.T) {
 		},
 		{
 			"negative timeout",
-			&app.State{App: newApp(nil, "-timeout", "-30s", "list")},
+			&State{App: newApp(nil, "-timeout", "-30s", "list")},
 			expected{
 				nil,
 				"",
@@ -141,7 +139,7 @@ func TestState_ParseArguments(t *testing.T) {
 		},
 		{
 			"custom repo",
-			&app.State{App: newApp(nil, "-repo", "demosdemon/gitignore", "list")},
+			&State{App: newApp(nil, "-repo", "demosdemon/gitignore", "list")},
 			expected{
 				nil,
 				"",
@@ -153,7 +151,7 @@ func TestState_ParseArguments(t *testing.T) {
 		},
 		{
 			"invalid repo",
-			&app.State{App: newApp(nil, "-repo=invalid", "list")},
+			&State{App: newApp(nil, "-repo=invalid", "list")},
 			expected{
 				nil,
 				"",
@@ -184,22 +182,22 @@ func TestState_ParseArguments(t *testing.T) {
 func TestState_Command(t *testing.T) {
 	cases := []struct {
 		name  string
-		state *app.State
+		state *State
 		err   *string
 	}{
 		{
 			"dump",
-			&app.State{App: newApp(nil, "dump")},
+			&State{App: newApp(nil, "dump")},
 			nil,
 		},
 		{
 			"list",
-			&app.State{App: newApp(nil, "list")},
+			&State{App: newApp(nil, "list")},
 			nil,
 		},
 		{
 			"invalid",
-			&app.State{App: newApp(nil, "invalid")},
+			&State{App: newApp(nil, "invalid")},
 			strptr("unrecognized action invalid"),
 		},
 	}
@@ -220,7 +218,7 @@ func TestState_Command(t *testing.T) {
 				assert.Equal(t, tt.name, name)
 
 				rv := cmd.Run()
-				assert.Equal(t, app.ExitStatus(0), rv)
+				assert.Equal(t, ExitStatus(0), rv)
 			}
 		})
 	}
@@ -229,17 +227,17 @@ func TestState_Command(t *testing.T) {
 func TestState_Client(t *testing.T) {
 	cases := []struct {
 		name  string
-		state *app.State
+		state *State
 		err   *string
 	}{
 		{
 			"valid",
-			&app.State{App: newApp(nil, "test")},
+			&State{App: newApp(nil, "test")},
 			nil,
 		},
 		{
 			"invalid",
-			&app.State{App: newApp(nil, "-repo", "invalid", "test")},
+			&State{App: newApp(nil, "-repo", "invalid", "test")},
 			strptr("invalid repo"),
 		},
 	}
@@ -260,7 +258,7 @@ func TestState_Client(t *testing.T) {
 func TestState_deadline(t *testing.T) {
 	a := newApp(nil, "-timeout", "1ns", "test")
 	defer a.Logger().ShutdownLoggers()
-	s := app.State{App: a}
+	s := State{App: a}
 	_ = s.ParseArguments()
 	c, _ := s.Client()
 	c.SetHTTPClient(&http.Client{Transport: newReplay("anonymous")})

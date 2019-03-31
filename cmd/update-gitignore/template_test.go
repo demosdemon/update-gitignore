@@ -1,4 +1,4 @@
-package app_test
+package main
 
 import (
 	"encoding/json"
@@ -6,15 +6,13 @@ import (
 
 	"github.com/google/go-github/v24/github"
 	"github.com/stretchr/testify/require"
-
-	"github.com/demosdemon/update-gitignore/v0/app"
 )
 
 func TestNewTemplate(t *testing.T) {
 	type testcase struct {
 		name      string
 		entryJSON string
-		expected  *app.Template
+		expected  *Template
 	}
 
 	cases := []testcase{
@@ -53,7 +51,7 @@ func TestNewTemplate(t *testing.T) {
 				"url":
 				"https://api.github.com/repos/github/gitignore/git/blobs/5d947ca8879f8a9072fe485c566204e3c2929e80"
 			}`,
-			&app.Template{
+			&Template{
 				"Actionscript",
 				350,
 				"Actionscript.gitignore",
@@ -83,7 +81,7 @@ func TestNewTemplate(t *testing.T) {
 			var entry github.TreeEntry
 			err := json.Unmarshal([]byte(tt.entryJSON), &entry)
 			require.NoError(t, err)
-			tpl := app.NewTemplate(entry)
+			tpl := NewTemplate(entry)
 			require.Equal(t, tt.expected, tpl)
 		})
 	}

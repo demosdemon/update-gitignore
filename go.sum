@@ -18,6 +18,8 @@ github.com/davecgh/go-spew v1.1.0 h1:ZDRjVQ15GmhC3fiQ8ni8+OwkZQO4DARzQgrnXU1Liz8
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
+github.com/demosdemon/golang-app-framework v1.0.1 h1:ZwUulRDyENEo9+KhMaNAeJKN3pTjLsRkog6U9aIfdqY=
+github.com/demosdemon/golang-app-framework v1.0.1/go.mod h1:UqVK7EzDL2b01OETdxmAggUvqIk8lJWHJBbY3AHkSdo=
 github.com/efritz/backoff v1.0.0 h1:r1DfNhA1J7p8kZ185J/hLPz2Bl5ezTicUr9KamEAOYw=
 github.com/efritz/backoff v1.0.0/go.mod h1:/tKomesOo7ekklUHEHxBbzNpjyBiOoiDCif3AcO+OIU=
 github.com/efritz/glock v0.0.0-20181228234553-f184d69dff2c h1:Q3HKbZogL9GGZVdO3PiVCOxZmRCsQAgV1xfelXJF/dY=

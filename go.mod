@@ -1,11 +1,11 @@
-module github.com/demosdemon/update-gitignore/v0
+module github.com/demosdemon/update-gitignore
 
 go 1.12
 
 require (
 	github.com/aphistic/gomol v0.0.0-20190314031446-1546845ba714
-	github.com/aphistic/gomol-console v0.0.0-20180111152223-9fa1742697a8
 	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/demosdemon/golang-app-framework v1.0.1
 	github.com/golang/protobuf v1.3.1 // indirect
 	github.com/google/go-github/v24 v24.0.1
 	github.com/onsi/ginkgo v1.8.0 // indirect

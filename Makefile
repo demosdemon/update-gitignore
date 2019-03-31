@@ -1,9 +1,9 @@
 SOURCE_FILES = $(shell find . -type f -not -path './vendor/*' -iname '*.go' -not -iname '*_test.go')
 TEST_FILES = $(shell find . -type f -not -path './vendor/*' -iname '*_test.go')
 
-_prefix = github.com/demosdemon/update-gitignore/v0
+_prefix = github.com/demosdemon/update-gitignore
 COMMANDS = $(notdir $(wildcard cmd/*))
-PACKAGES = app $(foreach b,$(COMMANDS),cmd/$(b))
+PACKAGES = $(foreach b,$(COMMANDS),cmd/$(b))
 BUILD_TARGETS = $(foreach b,$(COMMANDS),build/$(b))
 TEST_PACKAGES = $(foreach b,$(PACKAGES),$(_prefix)/$(b))
 
@@ -47,6 +47,11 @@ lint:
 	golangci-lint run
 
 .PHONY: test
-test: help build
-	ls -lh build
-	go test -v -timeout 30s -covermode=count -coverprofile=coverage.out -coverpkg ./... -benchmem -bench=. $(TEST_PACKAGES)
+test: build
+	@set -x; for pkg in $(TEST_PACKAGES); do mkdir -vp build/$$pkg; go test -v -timeout 30s -covermode atomic -coverprofile build/$$pkg/cover.out -trace build/$$pkg/trace.out -coverpkg ./... $$pkg; done
+	ls -lhAR build
+	gocovmerge $(foreach pkg,$(TEST_PACKAGES),build/$(pkg)/cover.out) > coverage.out
+
+.PHONY: bench
+bench:
+	go test -v -benchmem -bench=. $(TEST_PACKAGES)
