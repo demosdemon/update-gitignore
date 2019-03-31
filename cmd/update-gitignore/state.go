@@ -1,4 +1,4 @@
-package app
+package main
 
 import (
 	"context"
@@ -9,6 +9,8 @@ import (
 	"time"
 
 	"github.com/aphistic/gomol"
+
+	"github.com/demosdemon/golang-app-framework/app"
 )
 
 var (
@@ -20,7 +22,7 @@ var (
 
 // The State of the application.
 type State struct {
-	*App
+	*app.App
 
 	// command-line flags
 	debug     bool

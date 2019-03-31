@@ -8,7 +8,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/demosdemon/update-gitignore/v0/app"
+	"github.com/demosdemon/golang-app-framework/app"
 )
 
 func TestMain(t *testing.T) {
@@ -61,7 +61,7 @@ func TestMain(t *testing.T) {
 				Stdin:       strings.NewReader(tt.stdin),
 				Stdout:      new(bytes.Buffer),
 				Stderr:      new(bytes.Buffer),
-				Exit: func(code int) {
+				ExitHandler: func(code int) {
 					panic(code)
 				},
 			}

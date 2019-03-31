@@ -29,6 +29,7 @@ before_install:
   - golangci-lint --version
   - go install golang.org/x/tools/cmd/cover
   - go install github.com/mattn/goveralls
+  - go install github.com/wadey/gocovmerge
 
 install:
   - go mod vendor

@@ -1,4 +1,4 @@
-package app
+package main
 
 type (
 	ExitStatus uint8
