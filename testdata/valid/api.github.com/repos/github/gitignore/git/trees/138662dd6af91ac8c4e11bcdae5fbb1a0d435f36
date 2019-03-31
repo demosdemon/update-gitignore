@@ -1,0 +1,27 @@
+HTTP/1.1 200 OK
+Server: GitHub.com
+Date: Sun, 24 Mar 2019 21:38:01 GMT
+Content-Type: application/json; charset=utf-8
+Content-Length: 406
+Status: 200 OK
+X-RateLimit-Limit: 5000
+X-RateLimit-Remaining: 4986
+X-RateLimit-Reset: 1553467081
+Cache-Control: private, max-age=60, s-maxage=60
+Vary: Accept, Authorization, Cookie, X-GitHub-OTP
+ETag: "1f89bd95c2265a7c12ba723263d67e4d"
+Last-Modified: Sun, 24 Mar 2019 21:23:49 GMT
+X-OAuth-Scopes:
+X-Accepted-OAuth-Scopes:
+X-GitHub-Media-Type: github.v3; format=json
+Access-Control-Expose-Headers: ETag, Link, Location, Retry-After, X-GitHub-OTP, X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset, X-OAuth-Scopes, X-Accepted-OAuth-Scopes, X-Poll-Interval, X-GitHub-Media-Type
+Access-Control-Allow-Origin: *
+Strict-Transport-Security: max-age=31536000; includeSubdomains; preload
+X-Frame-Options: deny
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 1; mode=block
+Referrer-Policy: origin-when-cross-origin, strict-origin-when-cross-origin
+Content-Security-Policy: default-src 'none'
+X-GitHub-Request-Id: E81D:3855:1C80DFC:39A9F87:5C97F8B8
+
+{"sha":"138662dd6af91ac8c4e11bcdae5fbb1a0d435f36","url":"https://api.github.com/repos/github/gitignore/git/trees/138662dd6af91ac8c4e11bcdae5fbb1a0d435f36","tree":[{"path":"Phoenix.gitignore","mode":"100644","type":"blob","sha":"522c8d56c21ab3ce12f46fd639845854dead1c30","size":457,"url":"https://api.github.com/repos/github/gitignore/git/blobs/522c8d56c21ab3ce12f46fd639845854dead1c30"}],"truncated":false}

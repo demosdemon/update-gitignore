@@ -1,0 +1,27 @@
+HTTP/1.1 200 OK
+Server: GitHub.com
+Date: Sun, 24 Mar 2019 21:38:27 GMT
+Content-Type: application/json; charset=utf-8
+Content-Length: 638
+Status: 200 OK
+X-RateLimit-Limit: 5000
+X-RateLimit-Remaining: 4981
+X-RateLimit-Reset: 1553467107
+Cache-Control: private, max-age=60, s-maxage=60
+Vary: Accept, Authorization, Cookie, X-GitHub-OTP
+ETag: "81409fb48bc962f5e260e4f5442b3531"
+Last-Modified: Sun, 24 Mar 2019 21:23:49 GMT
+X-OAuth-Scopes:
+X-Accepted-OAuth-Scopes:
+X-GitHub-Media-Type: github.v3; format=json
+Access-Control-Expose-Headers: ETag, Link, Location, Retry-After, X-GitHub-OTP, X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset, X-OAuth-Scopes, X-Accepted-OAuth-Scopes, X-Poll-Interval, X-GitHub-Media-Type
+Access-Control-Allow-Origin: *
+Strict-Transport-Security: max-age=31536000; includeSubdomains; preload
+X-Frame-Options: deny
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 1; mode=block
+Referrer-Policy: origin-when-cross-origin, strict-origin-when-cross-origin
+Content-Security-Policy: default-src 'none'
+X-GitHub-Request-Id: E823:608D:19ADC95:35BDE43:5C97F8D3
+
+{"sha":"023bb033fac03b7a50ea54a01df85eacbac819b3","url":"https://api.github.com/repos/github/gitignore/git/trees/023bb033fac03b7a50ea54a01df85eacbac819b3","tree":[{"path":"JupyterNotebooks.gitignore","mode":"100644","type":"blob","sha":"7727feac78fa59db373c800344b43bfc2c399d1a","size":190,"url":"https://api.github.com/repos/github/gitignore/git/blobs/7727feac78fa59db373c800344b43bfc2c399d1a"},{"path":"Nikola.gitignore","mode":"100644","type":"blob","sha":"dac64b4125f1f814a50321f510b1d622cc62fe0c","size":123,"url":"https://api.github.com/repos/github/gitignore/git/blobs/dac64b4125f1f814a50321f510b1d622cc62fe0c"}],"truncated":false}

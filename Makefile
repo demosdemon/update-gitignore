@@ -5,7 +5,7 @@ _prefix = github.com/demosdemon/update-gitignore
 COMMANDS = $(notdir $(wildcard cmd/*))
 PACKAGES = $(foreach b,$(COMMANDS),cmd/$(b))
 BUILD_TARGETS = $(foreach b,$(COMMANDS),build/$(b))
-TEST_PACKAGES = $(foreach b,$(PACKAGES),$(_prefix)/$(b))
+TEST_PACKAGES = $(_prefix) $(foreach b,$(PACKAGES),$(_prefix)/$(b))
 
 LDFLAGS = -s -w -extldflags "-static"
 

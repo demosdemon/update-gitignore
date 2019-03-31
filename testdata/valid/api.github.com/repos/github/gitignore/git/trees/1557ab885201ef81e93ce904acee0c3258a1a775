@@ -1,0 +1,27 @@
+HTTP/1.1 200 OK
+Server: GitHub.com
+Date: Sun, 24 Mar 2019 21:33:02 GMT
+Content-Type: application/json; charset=utf-8
+Content-Length: 3784
+Status: 200 OK
+X-RateLimit-Limit: 5000
+X-RateLimit-Remaining: 4996
+X-RateLimit-Reset: 1553466782
+Cache-Control: private, max-age=60, s-maxage=60
+Vary: Accept, Authorization, Cookie, X-GitHub-OTP
+ETag: "95f4f21b3d0d4b30b4ed8378bf6ed1a2"
+Last-Modified: Sun, 24 Mar 2019 21:23:49 GMT
+X-OAuth-Scopes:
+X-Accepted-OAuth-Scopes:
+X-GitHub-Media-Type: github.v3; format=json
+Access-Control-Expose-Headers: ETag, Link, Location, Retry-After, X-GitHub-OTP, X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset, X-OAuth-Scopes, X-Accepted-OAuth-Scopes, X-Poll-Interval, X-GitHub-Media-Type
+Access-Control-Allow-Origin: *
+Strict-Transport-Security: max-age=31536000; includeSubdomains; preload
+X-Frame-Options: deny
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 1; mode=block
+Referrer-Policy: origin-when-cross-origin, strict-origin-when-cross-origin
+Content-Security-Policy: default-src 'none'
+X-GitHub-Request-Id: E809:2C21:15FAD97:2F80E46:5C97F78E
+
+{"sha":"1557ab885201ef81e93ce904acee0c3258a1a775","url":"https://api.github.com/repos/github/gitignore/git/trees/1557ab885201ef81e93ce904acee0c3258a1a775","tree":[{"path":"Bazel.gitignore","mode":"100644","type":"blob","sha":"a08ff4860c9d2f8af0e03c7076baaecf25e6ccf4","size":220,"url":"https://api.github.com/repos/github/gitignore/git/blobs/a08ff4860c9d2f8af0e03c7076baaecf25e6ccf4"},{"path":"DotNet","mode":"040000","type":"tree","sha":"dd6c605b8263ae20baddadd15e39c387f3982f07","url":"https://api.github.com/repos/github/gitignore/git/trees/dd6c605b8263ae20baddadd15e39c387f3982f07"},{"path":"Elixir","mode":"040000","type":"tree","sha":"138662dd6af91ac8c4e11bcdae5fbb1a0d435f36","url":"https://api.github.com/repos/github/gitignore/git/trees/138662dd6af91ac8c4e11bcdae5fbb1a0d435f36"},{"path":"Exercism.gitignore","mode":"100644","type":"blob","sha":"b74882c8e5f938631bb92a7ea8e7545aa49b5937","size":140,"url":"https://api.github.com/repos/github/gitignore/git/blobs/b74882c8e5f938631bb92a7ea8e7545aa49b5937"},{"path":"Golang","mode":"040000","type":"tree","sha":"776cb8201a59b5b7f1dc3559a887393b1cac8229","url":"https://api.github.com/repos/github/gitignore/git/trees/776cb8201a59b5b7f1dc3559a887393b1cac8229"},{"path":"Java","mode":"040000","type":"tree","sha":"a8ac9bdf1a54dd2d534fe976ab2f0c302526b86b","url":"https://api.github.com/repos/github/gitignore/git/trees/a8ac9bdf1a54dd2d534fe976ab2f0c302526b86b"},{"path":"JavaScript","mode":"040000","type":"tree","sha":"0500c2215b26fb5258edc362f5bf96cd412dacf7","url":"https://api.github.com/repos/github/gitignore/git/trees/0500c2215b26fb5258edc362f5bf96cd412dacf7"},{"path":"Linux","mode":"040000","type":"tree","sha":"c393f60c1f79784dc0660002fc15fc96a64103a7","url":"https://api.github.com/repos/github/gitignore/git/trees/c393f60c1f79784dc0660002fc15fc96a64103a7"},{"path":"Logtalk.gitignore","mode":"100644","type":"blob","sha":"c680e647b35120c641057404a7436a72d674bfd2","size":373,"url":"https://api.github.com/repos/github/gitignore/git/blobs/c680e647b35120c641057404a7436a72d674bfd2"},{"path":"PHP","mode":"040000","type":"tree","sha":"d573a9cf08850a31c40762f3a957ee7195fa17f9","url":"https://api.github.com/repos/github/gitignore/git/trees/d573a9cf08850a31c40762f3a957ee7195fa17f9"},{"path":"Puppet.gitignore","mode":"100644","type":"blob","sha":"4fcdca7dc9541fbd809b082e64dff8737867a433","size":238,"url":"https://api.github.com/repos/github/gitignore/git/blobs/4fcdca7dc9541fbd809b082e64dff8737867a433"},{"path":"Python","mode":"040000","type":"tree","sha":"023bb033fac03b7a50ea54a01df85eacbac819b3","url":"https://api.github.com/repos/github/gitignore/git/trees/023bb033fac03b7a50ea54a01df85eacbac819b3"},{"path":"Racket.gitignore","mode":"100644","type":"blob","sha":"962478a15ec24d6f39dda6e741f795a606c6a4bc","size":226,"url":"https://api.github.com/repos/github/gitignore/git/blobs/962478a15ec24d6f39dda6e741f795a606c6a4bc"},{"path":"Red.gitignore","mode":"100644","type":"blob","sha":"b78a06fc376a96e3d5c4312761dbf255d78870d0","size":304,"url":"https://api.github.com/repos/github/gitignore/git/blobs/b78a06fc376a96e3d5c4312761dbf255d78870d0"},{"path":"Splunk.gitignore","mode":"100644","type":"blob","sha":"d063da0ea7503b5e64498ae60d52899b2c3a376c","size":192,"url":"https://api.github.com/repos/github/gitignore/git/blobs/d063da0ea7503b5e64498ae60d52899b2c3a376c"},{"path":"Xilinx.gitignore","mode":"100644","type":"blob","sha":"afe5e8214f8a4bbf733a02854aea5bb878eb4dfa","size":1388,"url":"https://api.github.com/repos/github/gitignore/git/blobs/afe5e8214f8a4bbf733a02854aea5bb878eb4dfa"},{"path":"embedded","mode":"040000","type":"tree","sha":"580c899881b7902aec1ca3eb80c1f7fbc322abbc","url":"https://api.github.com/repos/github/gitignore/git/trees/580c899881b7902aec1ca3eb80c1f7fbc322abbc"}],"truncated":false}

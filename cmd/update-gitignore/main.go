@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/demosdemon/golang-app-framework/app"
+	state "github.com/demosdemon/update-gitignore"
 )
 
 var instance = app.New()
@@ -18,7 +19,7 @@ func main() {
 		done <- struct{}{}
 	}()
 
-	state := State{App: instance}
+	state := state.State{App: instance}
 	err := state.ParseArguments()
 	if err != nil {
 		state.HandleError(err)

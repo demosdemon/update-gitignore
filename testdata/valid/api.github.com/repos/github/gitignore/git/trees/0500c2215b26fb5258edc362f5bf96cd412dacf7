@@ -1,0 +1,27 @@
+HTTP/1.1 200 OK
+Server: GitHub.com
+Date: Sun, 24 Mar 2019 21:38:12 GMT
+Content-Type: application/json; charset=utf-8
+Content-Length: 1291
+Status: 200 OK
+X-RateLimit-Limit: 5000
+X-RateLimit-Remaining: 4984
+X-RateLimit-Reset: 1553467092
+Cache-Control: private, max-age=60, s-maxage=60
+Vary: Accept, Authorization, Cookie, X-GitHub-OTP
+ETag: "b1f42360ae7fa5395fb354cb5aee70f3"
+Last-Modified: Sun, 24 Mar 2019 21:23:49 GMT
+X-OAuth-Scopes:
+X-Accepted-OAuth-Scopes:
+X-GitHub-Media-Type: github.v3; format=json
+Access-Control-Expose-Headers: ETag, Link, Location, Retry-After, X-GitHub-OTP, X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset, X-OAuth-Scopes, X-Accepted-OAuth-Scopes, X-Poll-Interval, X-GitHub-Media-Type
+Access-Control-Allow-Origin: *
+Strict-Transport-Security: max-age=31536000; includeSubdomains; preload
+X-Frame-Options: deny
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 1; mode=block
+Referrer-Policy: origin-when-cross-origin, strict-origin-when-cross-origin
+Content-Security-Policy: default-src 'none'
+X-GitHub-Request-Id: E820:33DD:14E177C:2DC4B67:5C97F8C4
+
+{"sha":"0500c2215b26fb5258edc362f5bf96cd412dacf7","url":"https://api.github.com/repos/github/gitignore/git/trees/0500c2215b26fb5258edc362f5bf96cd412dacf7","tree":[{"path":"Cordova.gitignore","mode":"100644","type":"blob","sha":"4bd87859e1275fec78cae889537bf8de94c2f56e","size":229,"url":"https://api.github.com/repos/github/gitignore/git/blobs/4bd87859e1275fec78cae889537bf8de94c2f56e"},{"path":"Meteor.gitignore","mode":"100644","type":"blob","sha":"7194fd0e17dc68d3ff9b6385e751f7aaa4e0a0ca","size":247,"url":"https://api.github.com/repos/github/gitignore/git/blobs/7194fd0e17dc68d3ff9b6385e751f7aaa4e0a0ca"},{"path":"NWjs.gitignore","mode":"100644","type":"blob","sha":"f006b08b5423b76beb786ca8f21de600f1ebcadc","size":424,"url":"https://api.github.com/repos/github/gitignore/git/blobs/f006b08b5423b76beb786ca8f21de600f1ebcadc"},{"path":"Nuxt.gitignore","mode":"100644","type":"blob","sha":"cd6c77a374c47f5a5300a47e84187f62763b251d","size":126,"url":"https://api.github.com/repos/github/gitignore/git/blobs/cd6c77a374c47f5a5300a47e84187f62763b251d"},{"path":"Vue.gitignore","mode":"100644","type":"blob","sha":"4538951c4b9a3602cc5069511f2d89cda5beed59","size":181,"url":"https://api.github.com/repos/github/gitignore/git/blobs/4538951c4b9a3602cc5069511f2d89cda5beed59"}],"truncated":false}

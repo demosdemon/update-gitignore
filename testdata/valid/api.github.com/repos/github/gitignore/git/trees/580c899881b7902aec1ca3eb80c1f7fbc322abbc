@@ -1,0 +1,27 @@
+HTTP/1.1 200 OK
+Server: GitHub.com
+Date: Sun, 24 Mar 2019 21:38:31 GMT
+Content-Type: application/json; charset=utf-8
+Content-Length: 636
+Status: 200 OK
+X-RateLimit-Limit: 5000
+X-RateLimit-Remaining: 4980
+X-RateLimit-Reset: 1553467111
+Cache-Control: private, max-age=60, s-maxage=60
+Vary: Accept, Authorization, Cookie, X-GitHub-OTP
+ETag: "c7b5e60c1b0a0948354b2d11b9f7ff03"
+Last-Modified: Sun, 24 Mar 2019 21:23:49 GMT
+X-OAuth-Scopes:
+X-Accepted-OAuth-Scopes:
+X-GitHub-Media-Type: github.v3; format=json
+Access-Control-Expose-Headers: ETag, Link, Location, Retry-After, X-GitHub-OTP, X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset, X-OAuth-Scopes, X-Accepted-OAuth-Scopes, X-Poll-Interval, X-GitHub-Media-Type
+Access-Control-Allow-Origin: *
+Strict-Transport-Security: max-age=31536000; includeSubdomains; preload
+X-Frame-Options: deny
+X-Content-Type-Options: nosniff
+X-XSS-Protection: 1; mode=block
+Referrer-Policy: origin-when-cross-origin, strict-origin-when-cross-origin
+Content-Security-Policy: default-src 'none'
+X-GitHub-Request-Id: E824:56B0:1A8DBCF:3625557:5C97F8D7
+
+{"sha":"580c899881b7902aec1ca3eb80c1f7fbc322abbc","url":"https://api.github.com/repos/github/gitignore/git/trees/580c899881b7902aec1ca3eb80c1f7fbc322abbc","tree":[{"path":"AtmelStudio.gitignore","mode":"100644","type":"blob","sha":"5dfc4696538447de780f5abea463766cce04a36a","size":408,"url":"https://api.github.com/repos/github/gitignore/git/blobs/5dfc4696538447de780f5abea463766cce04a36a"},{"path":"IAR_EWARM.gitignore","mode":"100644","type":"blob","sha":"13ed9a0b19224479a61383f044f806197bdd1205","size":384,"url":"https://api.github.com/repos/github/gitignore/git/blobs/13ed9a0b19224479a61383f044f806197bdd1205"}],"truncated":false}
